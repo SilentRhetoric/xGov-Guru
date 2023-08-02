@@ -104,7 +104,9 @@ function App() {
     if (sort() == "name") {
       reverse()
     } else {
-      const sorted = questions().slice().sort()
+      
+    const sorted = questions().slice().sort((a,b) => {return parseInt(a.prompt.substring(1,3)) > parseInt(b.prompt.substring(1,3)) ? 1 : ((parseInt(b.prompt.substring(1,3)) > parseInt(a.prompt.substring(1,3))) ? -1 : 0)})
+    
       setQuestions(sorted)
     }
     setSort("name")
