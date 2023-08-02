@@ -50,7 +50,7 @@ export function numberWithCommas(num: number | string): string {
 function App() {
   const [questions, setQuestions] = createSignal<Question[]>([])
   const [expandedItem, setExpandedItem] = createSignal([""])
-  const [sort, setSort] = createSignal("")
+  const [sort, setSort] = createSignal("name")
 
   async function fetchQuestions(): Promise<void> {
     const text = await fetch(
