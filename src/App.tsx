@@ -1,5 +1,14 @@
 import { Accordion, Button } from "@kobalte/core"
-import { For, createSignal, onCleanup, onMount } from "solid-js"
+import {
+  For,
+  Suspense,
+  createComputed,
+  createResource,
+  createSignal,
+  lazy,
+  onCleanup,
+  onMount,
+} from "solid-js"
 
 type Created = {
   at: string
@@ -24,7 +33,7 @@ type Question = {
   id: string
   metadata: Metadata
   options: Options[]
-  proposal_url: string
+  // proposal_url: string
   prompt: string
 }
 
@@ -91,6 +100,7 @@ function App() {
   const [timerDetails, setTimerDetails] = createSignal(
     timeBetweenDates(new Date(sessionData().end).valueOf()).timeData
   )
+  const [proposal] = createResource(expandedItem, getProposal)
 
   const timer = setInterval(() => {
     setTimerDetails(timeBetweenDates(new Date(sessionData().end).valueOf()).timeData)
@@ -98,28 +108,16 @@ function App() {
 
   onCleanup(() => clearInterval(timer))
 
-  async function fetchQuestions(): Promise<void> {
+  async function fetchSessionData(): Promise<void> {
     const text = await fetch(
       `https://api.voting.algorand.foundation/ipfs/bafkreigjiien52ukmfqd5yrjgonrj6ixpr2rm32szps45ztpehk7z4lhli`
     ).then((response) => response.text())
     const sessionData: SessionData = JSON.parse(text)
     console.log(sessionData)
-    sessionData.questions.forEach(async (question) => {
-      const abstract = question.description.split("#")[0]
+    sessionData.questions.forEach((question) => {
+      const abstract = question.description.split("#")[0] // Use only content above the next heading
       if (abstract) {
         question.description = abstract
-      }
-      const regex = /(?<=pull\/)\d+(?=\/files)/
-      const pr = question.metadata.link.match(regex)
-      if (pr) {
-        const resp = await fetch(
-          `https://raw.githubusercontent.com/algorandfoundation/xGov/main/Proposals/xgov-${pr[0]}.md`
-        )
-        if (resp.ok) {
-          question.proposal_url = `https://raw.githubusercontent.com/algorandfoundation/xGov/main/Proposals/xgov-${pr[0]}.md`
-        } else {
-          question.proposal_url = `https://raw.githubusercontent.com/algorandfoundation/xGov/main/Proposals/xGov-${pr[0]}.md`
-        }
       }
       return question
     })
@@ -128,7 +126,23 @@ function App() {
     setSessionData(sessionData)
   }
 
-  onMount(() => fetchQuestions())
+  async function getProposal(expandedItem: string[]): Promise<string> {
+    const question = questions()[Number(expandedItem[0])]
+    const regex = /(?<=pull\/)\d+(?=\/files)/
+    const pr = question.metadata.link.match(regex)
+    if (pr && pr[0]) {
+      const resp = await fetch(
+        `https://raw.githubusercontent.com/algorandfoundation/xGov/main/Proposals/xgov-${pr[0]}.md`
+      )
+      if (resp.ok) {
+        return `https://raw.githubusercontent.com/algorandfoundation/xGov/main/Proposals/xgov-${pr[0]}.md`
+      } else {
+        return `https://raw.githubusercontent.com/algorandfoundation/xGov/main/Proposals/xGov-${pr[0]}.md`
+      }
+    } else return ""
+  }
+
+  onMount(() => fetchSessionData())
 
   function reverse() {
     const reversed = questions().slice().reverse()
@@ -171,12 +185,13 @@ function App() {
       <header class="sticky top-0 z-50 bg-neutral-300 p-2">
         <div class="md mx-auto flex max-w-screen-lg flex-col flex-wrap items-center justify-between px-2 md:flex-row">
           <div class="flex">
-            <h1 class="my-2 flex text-2xl font-bold">{sessionData().title}</h1>
+            <h1 class="my-2 flex text-2xl font-bold">xGov Proposals Viewer</h1>
           </div>
           <div class="flex items-center gap-2">
             <Button.Root
-              class=" flex h-12 w-12 items-center justify-center rounded-lg  border-[1.5px] border-black px-3 py-2 text-lg font-bold  hover:bg-neutral-300 active:bg-neutral-400"
+              class="flex h-12 w-12 items-center justify-center rounded-lg  border-[1px] border-black px-3 py-2 text-lg font-bold  hover:bg-neutral-300 active:bg-neutral-400"
               onClick={sortName}
+              aria-label="Sort by number"
             >
               #
             </Button.Root>
@@ -195,8 +210,9 @@ function App() {
               />
             </svg>
             <Button.Root
-              class="flex h-12 w-12 items-center justify-center rounded-lg border-[1.5px] border-black px-2 py-2 hover:bg-neutral-300 active:bg-neutral-400"
+              class="flex h-12 w-12 items-center justify-center rounded-lg border-[1px] border-black px-2 py-2 hover:bg-neutral-300 active:bg-neutral-400"
               onClick={sortAmount}
+              aria-label="Sort by amount"
             >
               <svg
                 class="h-6 w-6"
@@ -216,27 +232,8 @@ function App() {
                 />
               </svg>
             </Button.Root>
-            {/* <Button.Root
-              class=" flex h-12 w-12 items-center justify-center rounded-lg border-[1.5px] border-black px-2 py-2  hover:bg-neutral-300 active:bg-neutral-400"
-              onClick={() => setExpandedItem(() => [""])}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke-width="2"
-                stroke="currentColor"
-                class="h-6 w-6"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </Button.Root> */}
             <a
-              class="flex h-12 w-24 items-center justify-center rounded-lg border-[1.5px] border-black px-2 py-2 text-lg  hover:bg-neutral-300 active:bg-neutral-400"
+              class="flex h-12 w-24 items-center justify-center rounded-lg border-[1px] border-black px-2 py-2 text-lg  hover:bg-neutral-300 active:bg-neutral-400"
               href="https://xgov.algorand.foundation/vote/1158913461"
               target="_blank"
               rel="noopener noreferrer"
@@ -261,12 +258,15 @@ function App() {
         </div>
       </header>
       <div class="mx-auto flex max-w-screen-lg flex-col gap-2 p-2">
-        <div class="rounded-xl  p-2">
+        <div class="rounded-xl p-2">
           <p class="font-semibold">
-            Session description: <span class="font-light">{sessionData().description}</span>
+            Session Title: <span class="font-light">{sessionData().title}</span>
           </p>
           <p class="font-semibold">
-            Discussion forum:{" "}
+            Session Description: <span class="font-light">{sessionData().description}</span>
+          </p>
+          <p class="font-semibold">
+            Discussion Forum:{" "}
             <a
               class="font-light text-blue-600 underline visited:text-purple-600 hover:text-blue-800"
               href={sessionData().informationUrl}
@@ -275,13 +275,13 @@ function App() {
             </a>
           </p>
           <p class="font-semibold">
-            Session start:{" "}
+            Session Start Time:{" "}
             <span class="font-light">
               {new Date(sessionData().start).toLocaleString(undefined, { timeZoneName: "short" })}
             </span>
           </p>
           <p class="font-semibold">
-            Session end:{" "}
+            Session End Time:{" "}
             <span class="font-light">
               {new Date(sessionData().end).toLocaleString(undefined, { timeZoneName: "short" })}
             </span>
@@ -304,20 +304,18 @@ function App() {
           <For each={questions()}>
             {(question, i) => (
               <Accordion.Item
-                value={`item-${i() + 1}`}
-                class="rounded-xl bg-neutral-200 hover:bg-neutral-300 active:bg-neutral-400"
+                value={`${i()}`}
+                class="rounded-xl border-[1px] border-black bg-neutral-200 hover:bg-neutral-300 active:bg-neutral-400"
               >
                 <Accordion.Trigger class="w-full p-2 text-left">
-                  <Accordion.Header>
-                    <h2 class="font-semibold">{question.prompt}</h2>
-                    <p class="font-light">Category: {question.metadata.category}</p>
-                    <p class="font-light">Focus Area: {question.metadata.focus_area}</p>
-                    <p class="font-light">
-                      Request: {numberWithCommas(question.metadata.ask)} Algos
-                    </p>
-                  </Accordion.Header>
+                  <p class="font-semibold">{question.prompt}</p>
+                  <p class="font-light">Category: {question.metadata.category}</p>
+                  <p class="font-light">Focus Area: {question.metadata.focus_area}</p>
+                  <p class="font-light">Request: {numberWithCommas(question.metadata.ask)} Algos</p>
                   <Accordion.Content class="p-2">
-                    <zero-md src={question.proposal_url}></zero-md>
+                    <Suspense fallback={<p class="font-light">{"Loading from GitHub..."}</p>}>
+                      <zero-md src={proposal()}></zero-md>
+                    </Suspense>
                   </Accordion.Content>
                 </Accordion.Trigger>
               </Accordion.Item>
@@ -327,7 +325,10 @@ function App() {
       </div>
       <footer class="flex flex-row justify-center gap-2 p-4">
         <p class="font-light">Made with &#9829; by SilentRhetoric</p>
-        <a href="https://github.com/SilentRhetoric/xGov-viewer">
+        <a
+          href="https://github.com/SilentRhetoric/xGov-viewer"
+          aria-label="GitHub repository"
+        >
           <svg
             width="25"
             height="24"
