@@ -186,7 +186,7 @@ function App() {
               viewBox="0 0 24 24"
               stroke-width="1.5"
               stroke="currentColor"
-              class="h-6 w-6"
+              class="mx-1 h-6 w-6"
             >
               <path
                 stroke-linecap="round"
@@ -216,7 +216,7 @@ function App() {
                 />
               </svg>
             </Button.Root>
-            <Button.Root
+            {/* <Button.Root
               class=" flex h-12 w-12 items-center justify-center rounded-lg border-[1.5px] border-black px-2 py-2  hover:bg-neutral-300 active:bg-neutral-400"
               onClick={() => setExpandedItem(() => [""])}
             >
@@ -234,14 +234,28 @@ function App() {
                   d="M6 18L18 6M6 6l12 12"
                 />
               </svg>
-            </Button.Root>
+            </Button.Root> */}
             <a
-              class="flex h-12 items-center justify-center rounded-lg border-[1.5px] border-black px-2 py-2 text-lg  hover:bg-neutral-300 active:bg-neutral-400"
+              class="flex h-12 w-24 items-center justify-center rounded-lg border-[1.5px] border-black px-2 py-2 text-lg  hover:bg-neutral-300 active:bg-neutral-400"
               href="https://xgov.algorand.foundation/vote/1158913461"
               target="_blank"
               rel="noopener noreferrer"
             >
               Vote
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                class="h-6 w-6"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75"
+                />
+              </svg>
             </a>
           </div>
         </div>
@@ -293,19 +307,19 @@ function App() {
                 value={`item-${i() + 1}`}
                 class="rounded-xl bg-neutral-200 hover:bg-neutral-300 active:bg-neutral-400"
               >
-                <Accordion.Header>
-                  <Accordion.Trigger class="w-full p-2 text-left">
+                <Accordion.Trigger class="w-full p-2 text-left">
+                  <Accordion.Header>
                     <h2 class="font-semibold">{question.prompt}</h2>
                     <p class="font-light">Category: {question.metadata.category}</p>
                     <p class="font-light">Focus Area: {question.metadata.focus_area}</p>
                     <p class="font-light">
                       Request: {numberWithCommas(question.metadata.ask)} Algos
                     </p>
-                  </Accordion.Trigger>
-                </Accordion.Header>
-                <Accordion.Content class="p-2">
-                  <zero-md src={question.proposal_url}></zero-md>
-                </Accordion.Content>
+                  </Accordion.Header>
+                  <Accordion.Content class="p-2">
+                    <zero-md src={question.proposal_url}></zero-md>
+                  </Accordion.Content>
+                </Accordion.Trigger>
               </Accordion.Item>
             )}
           </For>
