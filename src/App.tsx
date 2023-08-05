@@ -113,9 +113,8 @@ function App() {
       `https://api.voting.algorand.foundation/ipfs/bafkreigjiien52ukmfqd5yrjgonrj6ixpr2rm32szps45ztpehk7z4lhli`
     ).then((response) => response.text())
     const sessionData: SessionData = JSON.parse(text)
-    console.log(sessionData)
     sessionData.questions.forEach((question) => {
-      const abstract = question.description.split("#")[0] // Use only content above the next heading
+      const abstract = question.description.split("#")[0] // Use only the content above the next heading
       if (abstract) {
         question.description = abstract
       }
@@ -182,14 +181,14 @@ function App() {
 
   return (
     <div class="relative mx-auto flex flex-col bg-neutral-100">
-      <header class="sticky top-0 z-50 bg-neutral-300 p-2">
+      <header class="sticky top-0 z-50 border-b-[0.5px] border-black bg-neutral-300 p-2">
         <div class="md mx-auto flex max-w-screen-lg flex-col flex-wrap items-center justify-between px-2 md:flex-row">
           <div class="flex">
             <h1 class="my-2 flex text-2xl font-bold">xGov Proposals Viewer</h1>
           </div>
           <div class="flex items-center gap-2">
             <Button.Root
-              class="flex h-12 w-12 items-center justify-center rounded-lg  border-[1px] border-black px-3 py-2 text-lg font-bold  hover:bg-neutral-300 active:bg-neutral-400"
+              class="flex h-12 w-12 items-center justify-center rounded-lg  border-[0.5px] border-black px-3 py-2 text-lg font-bold  hover:bg-neutral-300 active:bg-neutral-400"
               onClick={sortName}
               aria-label="Sort by number"
             >
@@ -210,7 +209,7 @@ function App() {
               />
             </svg>
             <Button.Root
-              class="flex h-12 w-12 items-center justify-center rounded-lg border-[1px] border-black px-2 py-2 hover:bg-neutral-300 active:bg-neutral-400"
+              class="flex h-12 w-12 items-center justify-center rounded-lg border-[0.5px] border-black px-2 py-2 hover:bg-neutral-300 active:bg-neutral-400"
               onClick={sortAmount}
               aria-label="Sort by amount"
             >
@@ -233,7 +232,7 @@ function App() {
               </svg>
             </Button.Root>
             <a
-              class="flex h-12 w-24 items-center justify-center rounded-lg border-[1px] border-black px-2 py-2 text-lg  hover:bg-neutral-300 active:bg-neutral-400"
+              class="flex h-12 w-24 items-center justify-center rounded-lg border-[0.5px] border-black px-2 py-2 text-lg  hover:bg-neutral-300 active:bg-neutral-400"
               href="https://xgov.algorand.foundation/vote/1158913461"
               target="_blank"
               rel="noopener noreferrer"
@@ -305,14 +304,14 @@ function App() {
             {(question, i) => (
               <Accordion.Item
                 value={`${i()}`}
-                class="rounded-xl border-[1px] border-black bg-neutral-200 hover:bg-neutral-300 active:bg-neutral-400"
+                class="rounded-xl border-[0.5px] border-black bg-neutral-200 hover:bg-neutral-300 active:bg-neutral-400"
               >
                 <Accordion.Trigger class="w-full p-2 text-left">
                   <p class="font-semibold">{question.prompt}</p>
                   <p class="font-light">Category: {question.metadata.category}</p>
                   <p class="font-light">Focus Area: {question.metadata.focus_area}</p>
                   <p class="font-light">Request: {numberWithCommas(question.metadata.ask)} Algos</p>
-                  <Accordion.Content class="p-2">
+                  <Accordion.Content class="py-2">
                     <Suspense fallback={<p class="font-light">{"Loading from GitHub..."}</p>}>
                       <zero-md src={proposal()}></zero-md>
                     </Suspense>
@@ -323,7 +322,7 @@ function App() {
           </For>
         </Accordion.Root>
       </div>
-      <footer class="flex flex-row justify-center gap-2 p-4">
+      <footer class="flex flex-row justify-center gap-2 p-8">
         <p class="font-light">Made with &#9829; by SilentRhetoric</p>
         <a
           href="https://github.com/SilentRhetoric/xGov-viewer"
