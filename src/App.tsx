@@ -47,6 +47,16 @@ function numberWithCommas(num: number | string): string {
   return num_parts.join(".")
 }
 
+const dateOptions: Intl.DateTimeFormatOptions = {
+  weekday: "short",
+  year: "numeric",
+  month: "short",
+  day: "numeric",
+  hour: "numeric",
+  minute: "numeric",
+  timeZoneName: "short",
+}
+
 const timeBetweenDates = (validTill: string | number) => {
   const validFromDate = new Date()
   const validTillTimeStamp = Number(validTill)
@@ -172,14 +182,14 @@ function App() {
 
   return (
     <div class="relative mx-auto flex flex-col bg-neutral-100">
-      <header class="sticky top-0 z-50 border-b-[0.5px] border-black bg-neutral-300 p-2">
-        <div class="md mx-auto flex max-w-screen-lg flex-col flex-wrap items-center justify-between px-2 md:flex-row">
+      <header class="sticky top-0 z-50 border-b-[0.5px] border-black bg-neutral-300">
+        <div class="mx-auto flex max-w-screen-lg flex-col flex-wrap items-center justify-between px-4 py-2 md:flex-row">
           <div class="flex">
             <h1 class="my-2 flex text-2xl font-bold">xGov Proposals Viewer</h1>
           </div>
           <div class="flex items-center gap-2">
             <Button.Root
-              class="flex h-12 w-12 items-center justify-center rounded-lg  border-[0.5px] border-black px-3 py-2 text-lg font-bold  hover:bg-neutral-300 active:bg-neutral-400"
+              class="flex h-12 w-12 items-center justify-center rounded-lg border-[0.5px] border-black px-3 py-2 text-xl font-semibold hover:bg-neutral-300 active:bg-neutral-400"
               onClick={sortName}
               aria-label="Sort by number"
             >
@@ -205,25 +215,35 @@ function App() {
               aria-label="Sort by amount"
             >
               <svg
-                class="h-6 w-6"
-                viewBox="0 0 256 256"
-                fill="none"
+                width="238.36px"
+                height="238.72px"
+                viewBox="0 0 238.36 238.72"
+                version="1.1"
                 xmlns="http://www.w3.org/2000/svg"
+                class="h-4 w-4"
               >
-                <circle
-                  cx="128"
-                  cy="128"
-                  r="128"
-                  fill="black"
-                />
-                <path
-                  d="M182.09 183.16H163.405L151.27 138.02L125.18 183.165H104.32L144.645 113.285L138.155 89.0248L83.7799 183.18H62.9099L131.82 63.8198H150.09L158.09 93.4748H176.94L164.07 115.855L182.09 183.16Z"
-                  fill="white"
-                />
+                <g
+                  id="Page-1"
+                  stroke="none"
+                  stroke-width="1"
+                  fill="none"
+                  fill-rule="evenodd"
+                >
+                  <g
+                    id="algorand_logo_mark_black"
+                    fill="#000000"
+                    fill-rule="nonzero"
+                  >
+                    <polygon
+                      id="Path"
+                      points="238.36 238.68 200.99 238.68 176.72 148.4 124.54 238.69 82.82 238.69 163.47 98.93 150.49 50.41 41.74 238.72 0 238.72 137.82 0 174.36 0 190.36 59.31 228.06 59.31 202.32 104.07"
+                    ></polygon>
+                  </g>
+                </g>
               </svg>
             </Button.Root>
             <a
-              class="flex h-12 w-24 items-center justify-center rounded-lg border-[0.5px] border-black px-2 py-2 text-lg  hover:bg-neutral-300 active:bg-neutral-400"
+              class="flex h-12 w-24 items-center justify-center rounded-lg border-[0.5px] border-black px-2 py-2 text-xl font-light hover:bg-neutral-300 active:bg-neutral-400"
               href="https://xgov.algorand.foundation/vote/1158913461"
               target="_blank"
               rel="noopener noreferrer"
@@ -247,8 +267,9 @@ function App() {
           </div>
         </div>
       </header>
-      <div class="mx-auto flex max-w-screen-lg flex-col gap-2 p-2">
+      <div class="mx-auto flex w-full max-w-screen-lg flex-col gap-2 p-2">
         <div class="rounded-xl p-2">
+          <p class="font-semibold">Algorand xGov Session Details</p>
           <p class="font-semibold">
             Session Title: <span class="font-light">{sessionData().title}</span>
           </p>
@@ -265,25 +286,25 @@ function App() {
             </a>
           </p>
           <p class="font-semibold">
-            Session Start Time:{" "}
+            Session Start:{" "}
             <span class="font-light">
-              {new Date(sessionData().start).toLocaleString(undefined, { timeZoneName: "short" })}
+              {new Date(sessionData().start).toLocaleString(undefined, dateOptions)}
             </span>
           </p>
           <p class="font-semibold">
-            Session End Time:{" "}
+            Session End:{" "}
             <span class="font-light">
-              {new Date(sessionData().end).toLocaleString(undefined, { timeZoneName: "short" })}
+              {new Date(sessionData().end).toLocaleString(undefined, dateOptions)}
             </span>
           </p>
           <p class="font-semibold">
-            Time remaining:{" "}
+            Time Remaining:{" "}
             <span class="font-light">
               {timerDetails().days}d {timerDetails().hours}h {timerDetails().minutes}m{" "}
               {timerDetails().seconds}s
             </span>
           </p>
-          <p class="font-light">Click the tiles to view full proposal text:</p>
+          <p class="font-semibold">Click the tiles to view full proposal text</p>
         </div>
         <Accordion.Root
           collapsible
@@ -297,11 +318,20 @@ function App() {
                 value={`${i()}`}
                 class="rounded-xl border-[0.5px] border-black bg-neutral-200 hover:bg-neutral-300 active:bg-neutral-400"
               >
-                <Accordion.Trigger class="w-full p-2 text-left">
+                <Accordion.Trigger class="w-full p-2 text-left font-light">
                   <p class="font-semibold">{question.prompt}</p>
-                  <p class="font-light">Category: {question.metadata.category}</p>
-                  <p class="font-light">Focus Area: {question.metadata.focus_area}</p>
-                  <p class="font-light">Request: {numberWithCommas(question.metadata.ask)} Algos</p>
+                  <div class="flex flex-row">
+                    <p class="w-24">Category: </p>
+                    <p>{question.metadata.category}</p>
+                  </div>
+                  <div class="flex flex-row">
+                    <p class="w-24">Focus Area: </p>
+                    <p>{question.metadata.focus_area}</p>
+                  </div>
+                  <div class="flex flex-row">
+                    <p class="w-24">Request: </p>
+                    <p>{numberWithCommas(question.metadata.ask)} Algos</p>
+                  </div>
                   <Accordion.Content class="py-2">
                     <Suspense fallback={<p class="font-light">{"Loading from GitHub..."}</p>}>
                       {/* @ts-ignore */}
