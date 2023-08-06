@@ -1,14 +1,5 @@
 import { Accordion, Button } from "@kobalte/core"
-import {
-  For,
-  Suspense,
-  createComputed,
-  createResource,
-  createSignal,
-  lazy,
-  onCleanup,
-  onMount,
-} from "solid-js"
+import { For, Suspense, createResource, createSignal, onCleanup, onMount } from "solid-js"
 
 type Created = {
   at: string
@@ -313,6 +304,7 @@ function App() {
                   <p class="font-light">Request: {numberWithCommas(question.metadata.ask)} Algos</p>
                   <Accordion.Content class="py-2">
                     <Suspense fallback={<p class="font-light">{"Loading from GitHub..."}</p>}>
+                      {/* @ts-ignore */}
                       <zero-md src={proposal()}></zero-md>
                     </Suspense>
                   </Accordion.Content>
