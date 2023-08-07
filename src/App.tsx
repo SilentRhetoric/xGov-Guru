@@ -182,7 +182,7 @@ function App() {
 
   return (
     <div class="relative mx-auto flex flex-col bg-neutral-100">
-      <header class="sticky top-0 z-50 border-b-[0.5px] border-black bg-neutral-300">
+      <header class="sticky top-0 z-50 border-b-[0.5px] border-black bg-neutral-200">
         <div class="mx-auto flex max-w-screen-lg flex-col flex-wrap items-center justify-between px-4 py-2 md:flex-row">
           <div class="flex">
             <h1 class="my-2 flex text-2xl font-bold">xGov Proposals Viewer</h1>
