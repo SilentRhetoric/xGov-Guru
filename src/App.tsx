@@ -1,5 +1,13 @@
 import { Accordion, Button } from "@kobalte/core"
-import { For, Suspense, createResource, createSignal, onCleanup, onMount } from "solid-js"
+import {
+  For,
+  Suspense,
+  createComputed,
+  createResource,
+  createSignal,
+  onCleanup,
+  onMount,
+} from "solid-js"
 
 type Created = {
   at: string
@@ -97,7 +105,7 @@ function App() {
   const [sessionData, setSessionData] = createSignal<SessionData>({} as SessionData)
   const [questions, setQuestions] = createSignal<Question[]>([])
   const [expandedItem, setExpandedItem] = createSignal([""])
-  const [sort, setSort] = createSignal("name")
+  const [sort, setSort] = createSignal("")
   const [timerDetails, setTimerDetails] = createSignal(
     timeBetweenDates(new Date(sessionData().end).valueOf()).timeData
   )
@@ -106,7 +114,6 @@ function App() {
   const timer = setInterval(() => {
     setTimerDetails(timeBetweenDates(new Date(sessionData().end).valueOf()).timeData)
   }, 1000)
-
   onCleanup(() => clearInterval(timer))
 
   async function fetchSessionData(): Promise<void> {
@@ -121,15 +128,38 @@ function App() {
       }
       return question
     })
-    const questions = sessionData.questions.reverse()
-    setQuestions(questions)
     setSessionData(sessionData)
+    const questions = sessionData.questions.reverse()
+
+    // Expand a proposal based on URL search params
+    const currentUrl = new URL(window.location.href)
+    const params = new URLSearchParams(currentUrl.search)
+    const expandId = params.get("id")
+    if (expandId) {
+      const proposalToExpand = questions.find(
+        (question) => `${parseInt(question.prompt.substring(1, 3))}` === expandId
+      )
+      if (proposalToExpand) {
+        const indexOfProposal = questions.indexOf(proposalToExpand)
+        if (indexOfProposal >= 0) {
+          questions.splice(indexOfProposal, indexOfProposal)
+          questions.unshift(proposalToExpand)
+          setQuestions(questions)
+        }
+      } else {
+        setQuestions(questions)
+      }
+      setExpandedItem([expandId])
+    }
   }
 
   async function getProposal(expandedItem: string[]): Promise<string> {
-    const question = questions()[Number(expandedItem[0])]
+    // const question = questions()[Number(expandedItem[0])]
+    const question = questions().find(
+      (question) => `${parseInt(question.prompt.substring(1, 3))}` === expandedItem[0]
+    )
     const regex = /(?<=pull\/)\d+(?=\/files)/
-    const pr = question.metadata.link.match(regex)
+    const pr = question && question.metadata.link.match(regex)
     if (pr && pr[0]) {
       const resp = await fetch(
         `https://raw.githubusercontent.com/algorandfoundation/xGov/main/Proposals/xgov-${pr[0]}.md`
@@ -137,6 +167,7 @@ function App() {
       if (resp.ok) {
         return `https://raw.githubusercontent.com/algorandfoundation/xGov/main/Proposals/xgov-${pr[0]}.md`
       } else {
+        // Second attempt in case filename case is camel
         return `https://raw.githubusercontent.com/algorandfoundation/xGov/main/Proposals/xGov-${pr[0]}.md`
       }
     } else return ""
@@ -315,7 +346,7 @@ function App() {
           <For each={questions()}>
             {(question, i) => (
               <Accordion.Item
-                value={`${i()}`}
+                value={`${parseInt(question.prompt.substring(1, 3))}`}
                 class="rounded-xl border-[0.5px] border-black bg-neutral-200 hover:bg-neutral-300 active:bg-neutral-400"
               >
                 <Accordion.Trigger class="w-full p-2 text-left font-light">
