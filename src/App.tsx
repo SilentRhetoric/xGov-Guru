@@ -145,11 +145,11 @@ function App() {
           questions.splice(indexOfProposal, indexOfProposal)
           questions.unshift(proposalToExpand)
           setQuestions(questions)
+          setExpandedItem([expandId])
         }
-      } else {
-        setQuestions(questions)
       }
-      setExpandedItem([expandId])
+    } else {
+      setQuestions(questions)
     }
   }
 
