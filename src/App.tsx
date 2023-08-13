@@ -139,6 +139,7 @@ function App() {
       const proposalToExpand = questions.find(
         (question) => `${parseInt(question.prompt.substring(1, 3))}` === expandId
       )
+      console.log(proposalToExpand)
       if (proposalToExpand) {
         const indexOfProposal = questions.indexOf(proposalToExpand)
         if (indexOfProposal >= 0) {
@@ -147,6 +148,8 @@ function App() {
           setQuestions(questions)
           setExpandedItem([expandId])
         }
+      } else {
+        setQuestions(questions)
       }
     } else {
       setQuestions(questions)
