@@ -1,7 +1,7 @@
 import * as algokit from "@algorandfoundation/algokit-utils"
 import { ABIArrayDynamicType, ABIUintType } from "algosdk"
 import { Buffer } from "buffer"
-import { SessionData, SessionResults, VoteRecord, VoterInfo } from "./types"
+import { SessionData, SessionResults, VoteRecord, VoterInfo, VotingData } from "./types"
 
 const indexerClient = algokit.getAlgoIndexerClient(algokit.getAlgoNodeConfig("mainnet", "indexer"))
 const xGov1App = 1158913461
@@ -167,17 +167,16 @@ export function enrichVoteRecords(sessionResults: SessionResults, voteRecords: V
 }
 
 // Pulls it all together for a resource that returns all the processed data
-export async function getVotingData() {
-  console.debug("Getting data...")
+export async function getVotingData(): Promise<VotingData> {
   try {
     const voterInfo = await getVoterInfo()
     const sessiondata = await getSessionData()
     const voteRecords = createVoteRecords(voterInfo)
     const sessionResults = createSessionResults(sessiondata, voteRecords)
     const enrichedVoteRecords = enrichVoteRecords(sessionResults, voteRecords)
-    console.debug("sessionResults: ", sessionResults)
-    console.debug("voterInfo: ", voterInfo)
-    console.debug("enrichedVoteRecords: ", enrichedVoteRecords)
+    // console.debug("sessionResults: ", sessionResults)
+    // console.debug("voterInfo: ", voterInfo)
+    // console.debug("enrichedVoteRecords: ", enrichedVoteRecords)
     return {
       results: sessionResults,
       voters: voterInfo,

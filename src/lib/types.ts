@@ -67,3 +67,9 @@ export interface SessionData {
 export interface SessionResults extends SessionData {
   questionResults: QuestionResult[]
 }
+
+export interface VotingData {
+  results: SessionResults
+  voters: VoterInfo[]
+  votes: VoteRecord[]
+}

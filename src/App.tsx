@@ -1,17 +1,8 @@
 import { Accordion, Button } from "@kobalte/core"
 import * as Plot from "@observablehq/plot"
-import {
-  For,
-  Suspense,
-  createMemo,
-  createResource,
-  createSignal,
-  onCleanup,
-  onMount,
-} from "solid-js"
-import { Question, SessionData } from "./lib/types"
+import { For, Suspense, createResource, createSignal, onCleanup } from "solid-js"
+import { Question, SessionData, VotingData } from "./lib/types"
 import { getVotingData, proposals } from "./lib/api"
-import { randomNormal } from "d3"
 
 function numberWithCommas(num: number | string): string {
   const num_parts = num.toString().split(".")
@@ -66,22 +57,22 @@ const timeBetweenDates = (validTill: string | number) => {
 }
 
 function App() {
-  const [data, { mutate, refetch }] = createResource(getVotingData)
-  const [sessionData, setSessionData] = createSignal<SessionData>({} as SessionData)
+  const [votingData, { mutate, refetch }] = createResource(getVotingData)
+  const [sessionData] = createResource(fetchSessionData)
   const [questions, setQuestions] = createSignal<Question[]>([])
   const [expandedItem, setExpandedItem] = createSignal([""])
   const [sort, setSort] = createSignal("")
   const [timerDetails, setTimerDetails] = createSignal(
-    timeBetweenDates(new Date(sessionData().end).valueOf()).timeData
+    timeBetweenDates(new Date(sessionData()?.end).valueOf()).timeData
   )
   const [proposal] = createResource(expandedItem, getProposal)
 
   const timer = setInterval(() => {
-    setTimerDetails(timeBetweenDates(new Date(sessionData().end).valueOf()).timeData)
+    setTimerDetails(timeBetweenDates(new Date(sessionData()?.end).valueOf()).timeData)
   }, 1000)
   onCleanup(() => clearInterval(timer))
 
-  async function fetchSessionData(): Promise<void> {
+  async function fetchSessionData(): Promise<SessionData> {
     const text = await fetch(
       `https://api.voting.algorand.foundation/ipfs/bafkreigjiien52ukmfqd5yrjgonrj6ixpr2rm32szps45ztpehk7z4lhli`
     ).then((response) => response.text())
@@ -93,7 +84,6 @@ function App() {
       }
       return question
     })
-    setSessionData(sessionData)
     const questions = sessionData.questions.reverse()
 
     // Expand a proposal based on URL search params
@@ -104,7 +94,6 @@ function App() {
       const proposalToExpand = questions.find(
         (question) => `${parseInt(question.prompt.substring(1, 3))}` === expandId
       )
-      console.log(proposalToExpand)
       if (proposalToExpand) {
         const indexOfProposal = questions.indexOf(proposalToExpand)
         if (indexOfProposal >= 0) {
@@ -118,8 +107,8 @@ function App() {
       }
     } else {
       setQuestions(questions)
-      console.debug("Questions: ", questions)
     }
+    return sessionData
   }
 
   async function getProposal(expandedItem: string[]): Promise<string> {
@@ -141,8 +130,6 @@ function App() {
       }
     } else return ""
   }
-
-  onMount(() => fetchSessionData())
 
   function reverse() {
     const reversed = questions().slice().reverse()
@@ -181,9 +168,9 @@ function App() {
   }
 
   // How many total votes did each proposal receive?  What was their effect?
-  const votesByProposal = createMemo(
-    () =>
-      data.state === "ready" &&
+  function votesByProposal(votingData: VotingData) {
+    return (
+      votingData &&
       Plot.plot({
         title: "Total Vote Weight By Proposal",
         color: { legend: true, scheme: "Greys" },
@@ -193,7 +180,7 @@ function App() {
         x: { type: "band", label: "Proposal", domain: proposals },
         y: { grid: true },
         marks: [
-          Plot.barY(data()?.votes, {
+          Plot.barY(votingData?.votes, {
             x: "proposal",
             y: "votes",
             fill: "effect",
@@ -203,7 +190,8 @@ function App() {
           }),
         ],
       })
-  )
+    )
+  }
 
   return (
     <div class="relative mx-auto flex flex-col bg-neutral-100">
@@ -294,44 +282,48 @@ function App() {
       </header>
       <div class="mx-auto flex w-full max-w-screen-lg flex-col gap-2 p-2">
         <div class="rounded-xl p-2">
-          <p class="font-semibold">Algorand xGov Session Details</p>
-          <p class="font-semibold">
-            Session Title: <span class="font-light">{sessionData().title}</span>
-          </p>
-          <p class="font-semibold">
-            Session Description: <span class="font-light">{sessionData().description}</span>
-          </p>
-          <p class="font-semibold">
-            Discussion Forum:{" "}
-            <a
-              class="font-light text-blue-600 underline visited:text-purple-600 hover:text-blue-800"
-              href={sessionData().informationUrl}
-            >
-              {sessionData().informationUrl}
-            </a>
-          </p>
-          <p class="font-semibold">
-            Session Start:{" "}
-            <span class="font-light">
-              {new Date(sessionData().start).toLocaleString(undefined, dateOptions)}
-            </span>
-          </p>
-          <p class="font-semibold">
-            Session End:{" "}
-            <span class="font-light">
-              {new Date(sessionData().end).toLocaleString(undefined, dateOptions)}
-            </span>
-          </p>
-          <p class="font-semibold">
-            Time Remaining:{" "}
-            <span class="font-light">
-              {timerDetails().days}d {timerDetails().hours}h {timerDetails().minutes}m{" "}
-              {timerDetails().seconds}s
-            </span>
-          </p>
-          <p class="font-semibold">Click the tiles to view full proposal text</p>
+          <Suspense fallback={<span>Loading session details...</span>}>
+            <p class="font-semibold">Algorand xGov Session Details</p>
+            <p class="font-semibold">
+              Session Title: <span class="font-light">{sessionData()?.title}</span>
+            </p>
+            <p class="font-semibold">
+              Session Description: <span class="font-light">{sessionData()?.description}</span>
+            </p>
+            <p class="font-semibold">
+              Discussion Forum:{" "}
+              <a
+                class="font-light text-blue-600 underline visited:text-purple-600 hover:text-blue-800"
+                href={sessionData()?.informationUrl}
+              >
+                {sessionData()?.informationUrl}
+              </a>
+            </p>
+            <p class="font-semibold">
+              Session Start:{" "}
+              <span class="font-light">
+                {new Date(sessionData()?.start).toLocaleString(undefined, dateOptions)}
+              </span>
+            </p>
+            <p class="font-semibold">
+              Session End:{" "}
+              <span class="font-light">
+                {new Date(sessionData()?.end).toLocaleString(undefined, dateOptions)}
+              </span>
+            </p>
+            <p class="font-semibold">
+              Time Remaining:{" "}
+              <span class="font-light">
+                {timerDetails().days}d {timerDetails().hours}h {timerDetails().minutes}m{" "}
+                {timerDetails().seconds}s
+              </span>
+            </p>
+            <p class="font-semibold">Click the tiles to view full proposal text</p>
+          </Suspense>
         </div>
-        <div class="p-2">{votesByProposal()}</div>
+        <Suspense fallback={<div class="p-2">Analyzing voting data...</div>}>
+          <div class="p-2">{votesByProposal(votingData())}</div>
+        </Suspense>
         <Accordion.Root
           collapsible
           class="flex flex-col gap-2"
