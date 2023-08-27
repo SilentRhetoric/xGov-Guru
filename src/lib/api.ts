@@ -157,7 +157,7 @@ export function enrichVoteRecords(sessionResults: SessionResults, voteRecords: V
         v.effect = "Above Threshold (No Effect)"
         return v
       } else {
-        v.effect = "Below Threshold (Contributed to Passing)"
+        v.effect = "Below Threshold (Contributed Toward Passing)"
         return v
       }
     })

@@ -15,7 +15,7 @@ export type VoteRecord = {
   voterWeight: number
   voteRound: number
   voteRoundTime: number
-  effect?: "Above Threshold (No Effect)" | "Below Threshold (Contributed to Passing)"
+  effect?: "Above Threshold (No Effect)" | "Below Threshold (Contributed Toward Passing)"
 }
 
 export type Created = {
