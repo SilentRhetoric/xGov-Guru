@@ -1,53 +1,17 @@
 import { Accordion, Button } from "@kobalte/core"
+import * as Plot from "@observablehq/plot"
 import {
   For,
   Suspense,
-  createComputed,
+  createMemo,
   createResource,
   createSignal,
   onCleanup,
   onMount,
 } from "solid-js"
-
-type Created = {
-  at: string
-  by: string
-}
-
-type Metadata = {
-  ask: number
-  category: string
-  focus_area: string
-  link: string
-  threshold: number
-}
-
-type Options = {
-  id: string
-  label: string
-}
-
-type Question = {
-  description: string
-  id: string
-  metadata: Metadata
-  options: Options[]
-  // proposal_url: string
-  prompt: string
-}
-
-type SessionData = {
-  created: Created
-  description: string
-  end: string
-  id: string
-  informationUrl: string
-  questions: Question[]
-  start: string
-  title: string
-  type: number
-  voteGatingSnapshotCid: string
-}
+import { Question, SessionData } from "./lib/types"
+import { getVotingData, proposals } from "./lib/api"
+import { randomNormal } from "d3"
 
 function numberWithCommas(num: number | string): string {
   const num_parts = num.toString().split(".")
@@ -102,6 +66,7 @@ const timeBetweenDates = (validTill: string | number) => {
 }
 
 function App() {
+  const [data, { mutate, refetch }] = createResource(getVotingData)
   const [sessionData, setSessionData] = createSignal<SessionData>({} as SessionData)
   const [questions, setQuestions] = createSignal<Question[]>([])
   const [expandedItem, setExpandedItem] = createSignal([""])
@@ -153,6 +118,7 @@ function App() {
       }
     } else {
       setQuestions(questions)
+      console.debug("Questions: ", questions)
     }
   }
 
@@ -213,6 +179,31 @@ function App() {
     }
     setSort("name")
   }
+
+  // How many total votes did each proposal receive?  What was their effect?
+  const votesByProposal = createMemo(
+    () =>
+      data.state === "ready" &&
+      Plot.plot({
+        title: "Total Vote Weight By Proposal",
+        color: { legend: true, scheme: "Greys" },
+        style: { background: "none" },
+        marginLeft: 100,
+        width: 1000,
+        x: { type: "band", label: "Proposal", domain: proposals },
+        y: { grid: true },
+        marks: [
+          Plot.barY(data()?.votes, {
+            x: "proposal",
+            y: "votes",
+            fill: "effect",
+            sort: "effect",
+            reverse: true,
+            title: (d) => `${d.address}`,
+          }),
+        ],
+      })
+  )
 
   return (
     <div class="relative mx-auto flex flex-col bg-neutral-100">
@@ -340,6 +331,7 @@ function App() {
           </p>
           <p class="font-semibold">Click the tiles to view full proposal text</p>
         </div>
+        <div class="p-2">{votesByProposal()}</div>
         <Accordion.Root
           collapsible
           class="flex flex-col gap-2"
@@ -366,6 +358,7 @@ function App() {
                     <p class="w-24">Request: </p>
                     <p>{numberWithCommas(question.metadata.ask)} Algos</p>
                   </div>
+                  <div></div>
                   <Accordion.Content class="py-2">
                     <Suspense fallback={<p class="font-light">{"Loading from GitHub..."}</p>}>
                       {/* @ts-ignore */}
