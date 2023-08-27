@@ -45,12 +45,6 @@ export interface Question {
   prompt: string
 }
 
-export interface QuestionResult extends Question {
-  totalVotes?: number
-  passedRound?: number
-  passedTime?: number
-}
-
 export interface SessionData {
   created: Created
   description: string
@@ -62,6 +56,16 @@ export interface SessionData {
   title: string
   type: number
   voteGatingSnapshotCid: string
+}
+
+export interface QuestionResult extends Question {
+  totalVotes?: number
+  passedRound?: number
+  passedTime?: number
+  proposalIndex?: number
+  proposal?: string
+  threshold?: number
+  passed?: boolean
 }
 
 export interface SessionResults extends SessionData {

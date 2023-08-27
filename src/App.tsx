@@ -175,7 +175,7 @@ function App() {
         title: "Total Vote Weight By Proposal",
         color: { legend: true, scheme: "Greys" },
         style: { background: "none" },
-        marginLeft: 100,
+        marginLeft: 120,
         width: 1000,
         x: { type: "band", label: "Proposal", domain: proposals },
         y: { grid: true },
@@ -186,11 +186,49 @@ function App() {
             fill: "effect",
             sort: "effect",
             reverse: true,
+            tip: "xy",
             title: (d) => `${d.address}`,
           }),
         ],
       })
     )
+  }
+
+  function passingPercentage(votingData: VotingData) {
+    if (votingData) {
+      const actualProposals = proposals
+      actualProposals.pop()
+      const proposalsToGraph = votingData.results.questionResults
+      proposalsToGraph.pop()
+      return Plot.plot({
+        title: "Voting Weight vs Threshold by Proposal",
+        color: { legend: true, scheme: "Greys" },
+        style: { background: "none" },
+        marginLeft: 120,
+        width: 1000,
+        x: { type: "band", label: "Proposal", domain: actualProposals },
+        y: { percent: true },
+        marks: [
+          Plot.barY(proposalsToGraph, {
+            x: "proposal",
+            y: "totalVotes",
+            fill: "grey",
+          }),
+          Plot.dotY(proposalsToGraph, {
+            x: "proposal",
+            y: "threshold",
+            tip: "xy",
+            title: (d) => `${Math.round((d.totalVotes / d.threshold) * 100)}%`,
+          }),
+          // Plot.text(proposalsToGraph, {
+          //   text: (d) => `${Math.round((d.totalVotes / d.threshold) * 100)}%`,
+          //   x: "proposal",
+          //   y: "totalVotes",
+          //   textAnchor: "end",
+          // }),
+        ],
+      })
+    }
   }
 
   return (
@@ -323,6 +361,7 @@ function App() {
         </div>
         <Suspense fallback={<div class="p-2">Analyzing voting data...</div>}>
           <div class="p-2">{votesByProposal(votingData())}</div>
+          <div class="p-2">{passingPercentage(votingData())}</div>
         </Suspense>
         <Accordion.Root
           collapsible

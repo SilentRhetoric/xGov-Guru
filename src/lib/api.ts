@@ -126,8 +126,11 @@ export function createSessionResults(
   if (sessionData && voteRecords) {
     const sessionResultData = sessionData as SessionResults
     sessionResultData.questionResults = sessionResultData.questions
+    sessionResultData.questionResults.forEach((q, i) => (q.proposalIndex = i))
+    sessionResultData.questionResults.forEach((q, i) => (q.proposal = proposals[i]))
+    sessionResultData.questionResults.forEach((q, i) => (q.threshold = q.metadata.threshold))
+    sessionResultData.questionResults.forEach((q, i) => (q.passed = false))
     voteRecords.forEach((v) => {
-      console.debug()
       sessionResultData.questionResults[v.proposalIndex].totalVotes =
         sessionResultData.questionResults[v.proposalIndex].totalVotes + v.votes || v.votes
       if (
@@ -138,6 +141,7 @@ export function createSessionResults(
       ) {
         sessionResultData.questionResults[v.proposalIndex].passedRound = v.voteRound
         sessionResultData.questionResults[v.proposalIndex].passedTime = v.voteRoundTime
+        sessionResultData.questionResults[v.proposalIndex].passed = true
       }
     })
     return sessionResultData
