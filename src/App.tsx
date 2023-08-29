@@ -191,8 +191,8 @@ function App() {
             y: "votes",
             fill: "effect", //(d) => (d.effect === "No Effect - Above Threshold" ? "grey" : "black"),
             sort: "effect",
-            tip: "xy",
-            title: "address",
+            // tip: "xy",
+            // title: "address",
           }),
         ],
       })
@@ -208,7 +208,7 @@ function App() {
       proposalsToGraph.pop()
       return plot({
         title: "Total Supporting Voting Weight vs Passing Threshold By Proposal",
-        subtitle: "Annotated to incidate proposals already passed",
+        subtitle: "Threshol markers filled to incidate proposals already passed",
         // symbol: { legend: true },
         style: { background: "none" },
         marginLeft: 110,
@@ -223,17 +223,14 @@ function App() {
           dotY(proposalsToGraph, {
             x: "proposal",
             y: "threshold",
-            tip: "xy",
-            title: (d) => `${Math.round((d.totalVotes / d.threshold) * 100)}%`,
+            // tip: "xy",
+            // title: (d) => `${Math.round((d.totalVotes / d.threshold) * 100)}%`,
             symbol: "square",
             fill: (d) => (d.totalVotes > d.threshold ? "currentColor" : "none"),
             stroke: "black",
           }),
           text(proposalsToGraph, {
-            text: (d) =>
-              `${Math.round((d.totalVotes / d.threshold) * 100)}%${
-                d.totalVotes > d.threshold ? " (Passed)" : ""
-              }`,
+            text: (d) => `${Math.round((d.totalVotes / d.threshold) * 100)}%`,
             x: "proposal",
             y: "totalVotes",
             dx: 6,
