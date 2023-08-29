@@ -256,7 +256,6 @@ function App() {
           return acc
         }, [])
         .sort((a, b) => a.votes - b.votes)
-      console.debug(proposalVotes)
       const bar = plot({
         x: { percent: true },
         width: 1000,
