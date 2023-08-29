@@ -214,6 +214,7 @@ function App() {
         marginLeft: 110,
         width: 1000,
         x: { type: "band", label: "Proposal", domain: actualProposals },
+        y: { grid: true },
         marks: [
           barY(proposalsToGraph, {
             x: "proposal",
