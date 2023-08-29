@@ -372,7 +372,7 @@ function App() {
                 {timerDetails().seconds}s
               </span>
             </p>
-            <p class="font-semibold">Click the tiles to view full proposal text</p>
+            <p class="">Click the tiles to view full proposal text</p>
           </Suspense>
         </div>
 
@@ -411,15 +411,15 @@ function App() {
               >
                 <Accordion.Trigger class="w-full p-2 text-left font-light">
                   <p class="font-semibold">{question.prompt}</p>
-                  <div class="flex flex-row">
+                  <div class="flex flex-row text-sm leading-tight">
                     <p class="w-24">Category: </p>
                     <p>{question.metadata.category}</p>
                   </div>
-                  <div class="flex flex-row">
+                  <div class="flex flex-row text-sm leading-tight">
                     <p class="w-24">Focus Area: </p>
                     <p>{question.metadata.focus_area}</p>
                   </div>
-                  <div class="flex flex-row">
+                  <div class="flex flex-row text-sm leading-tight">
                     <p class="w-24">Request: </p>
                     <p>{numberWithCommas(question.metadata.ask)} Algos</p>
                   </div>
@@ -481,7 +481,7 @@ function App() {
             src={algonode}
             class="m-[-3px] h-8 w-8"
           />
-          <p class="ml-2">Indexer Powered by AlgoNode</p>
+          <p class="ml-2">Powered by AlgoNode</p>
         </a>
       </footer>
     </div>
