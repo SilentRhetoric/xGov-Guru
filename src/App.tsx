@@ -382,14 +382,15 @@ function App() {
           </Suspense>
         </div>
         <Show when={csv()}>
-          <Button.Root class="flex h-12 rounded-lg border-[0.5px] border-black px-3 py-2 text-xl hover:bg-neutral-300 active:bg-neutral-400">
-            <a
-              href={csv().url}
-              download={csv().filename}
-            >
+          <a
+            href={csv().url}
+            download={csv().filename}
+            class="flex"
+          >
+            <Button.Root class="flex h-12 w-full rounded-lg border-[0.5px] border-black px-3 py-2 text-xl hover:bg-neutral-300 active:bg-neutral-400">
               Download votes data as .csv file
-            </a>
-          </Button.Root>
+            </Button.Root>
+          </a>
         </Show>
         <div class="rounded-xl border-[0.5px] border-black p-2">
           <Suspense fallback={<div class="p-2">Generating graph... 📊</div>}>
