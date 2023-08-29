@@ -1,5 +1,5 @@
 import { Accordion, Button } from "@kobalte/core"
-import { plot, barY, text, dotY } from "@observablehq/plot"
+import { plot, barY, text, dotY, barX, stackX, ruleX } from "@observablehq/plot"
 import { For, Show, Suspense, createMemo, createResource, createSignal, onCleanup } from "solid-js"
 import { Question, SessionData, VotingData } from "./lib/types"
 import { createVotesCSV, getVotingData, proposals } from "./lib/api"
@@ -83,7 +83,8 @@ function App() {
       `https://api.voting.algorand.foundation/ipfs/bafkreigjiien52ukmfqd5yrjgonrj6ixpr2rm32szps45ztpehk7z4lhli`
     ).then((response) => response.text())
     const sessionData: SessionData = JSON.parse(text)
-    sessionData.questions.forEach((question) => {
+    sessionData.questions.forEach((question, i) => {
+      question.proposalIndex = i
       const abstract = question.description.split("#")[0] // Use only the content above the next heading
       if (abstract) {
         question.description = abstract
@@ -245,6 +246,30 @@ function App() {
     }
   }
 
+  function votesBar(question: Question) {
+    if (votingData()?.votes) {
+      const proposalVotes = votingData()
+        ?.votes.filter((v) => v.proposalIndex === question.proposalIndex && v.votes > 0)
+        .reduce((acc, v, i) => {
+          v.percentOfThreshold = v.votes / question.metadata.threshold
+          acc.push(v)
+          return acc
+        }, [])
+        .sort((a, b) => a.votes - b.votes)
+      console.debug(proposalVotes)
+      const bar = plot({
+        x: { percent: true },
+        width: 1000,
+        style: { background: "none" },
+        marks: [
+          barX(proposalVotes, stackX({ x: "percentOfThreshold", fill: "black", stroke: "white" })),
+          ruleX([0, 1]),
+        ],
+      })
+      return bar
+    }
+  }
+
   return (
     <div class="relative mx-auto flex flex-col bg-neutral-100">
       <header class="sticky top-0 z-50 border-b-[0.5px] border-black bg-neutral-200">
@@ -373,7 +398,6 @@ function App() {
             <p class="">Click the tiles to view full proposal text</p>
           </Suspense>
         </div>
-
         <div class="rounded-xl border-[0.5px] border-black p-2">
           <Suspense fallback={<div class="p-2">Generating graph... 📊</div>}>
             {votesByEffect(votingData())}
@@ -395,7 +419,6 @@ function App() {
             {votesVsThrehold(votingData())}
           </Suspense>
         </div>
-
         <Accordion.Root
           collapsible
           class="flex flex-col gap-2"
@@ -403,7 +426,7 @@ function App() {
           onChange={setExpandedItem}
         >
           <For each={questions()}>
-            {(question, i) => (
+            {(question) => (
               <Accordion.Item
                 value={`${parseInt(question.prompt.substring(1, 3))}`}
                 class="rounded-xl border-[0.5px] border-black bg-neutral-200 hover:bg-neutral-300 active:bg-neutral-400"
@@ -424,7 +447,10 @@ function App() {
                   </div>
                   <div></div>
                   <Accordion.Content class="py-2">
-                    <Suspense fallback={<p class="font-light">{"Loading from GitHub..."}</p>}>
+                    <div>{votesBar(question)}</div>
+                    <Suspense
+                      fallback={<p class="font-light">{"Loading proposal from GitHub..."}</p>}
+                    >
                       {/* @ts-ignore */}
                       <zero-md src={proposal()}></zero-md>
                     </Suspense>

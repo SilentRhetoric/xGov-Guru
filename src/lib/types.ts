@@ -16,6 +16,7 @@ export type VoteRecord = {
   voteRound: number
   voteRoundTime: number
   effect?: "No Effect - Above Threshold" | "Contributed To Passing - Below Threshold"
+  percentOfThreshold?: number
 }
 
 export type Created = {
@@ -41,8 +42,8 @@ export interface Question {
   id: string
   metadata: Metadata
   options: Options[]
-  // proposal_url: string
   prompt: string
+  proposalIndex?: number
 }
 
 export interface SessionData {
