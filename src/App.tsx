@@ -208,8 +208,8 @@ function App() {
       proposalsToGraph.pop()
       return plot({
         title: "Total Supporting Voting Weight vs Passing Threshold By Proposal",
-        subtitle: "Support annovated with percent of passing threshold",
-        color: { legend: true },
+        subtitle: "Annotated to incidate proposals already passed",
+        // symbol: { legend: true },
         style: { background: "none" },
         marginLeft: 110,
         width: 1000,
@@ -225,13 +225,13 @@ function App() {
             y: "threshold",
             tip: "xy",
             title: (d) => `${Math.round((d.totalVotes / d.threshold) * 100)}%`,
-            symbol: (d) => (d.totalVotes > d.threshold ? "star" : "circle"),
+            symbol: "square",
             fill: (d) => (d.totalVotes > d.threshold ? "currentColor" : "none"),
-            stroke: (d) => (d.totalVotes > d.threshold ? "none" : "currentColor"),
+            stroke: "black",
           }),
           text(proposalsToGraph, {
             text: (d) =>
-              `${Math.round((d.totalVotes / d.threshold) * 100)}% Support${
+              `${Math.round((d.totalVotes / d.threshold) * 100)}%${
                 d.totalVotes > d.threshold ? " (Passed)" : ""
               }`,
             x: "proposal",
