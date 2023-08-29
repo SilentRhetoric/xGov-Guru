@@ -39,7 +39,11 @@ export const proposals = [
 
 // Retrieve relevant vote txns from an indexer and create voter info from them
 export async function getVoterInfo(): Promise<VoterInfo[]> {
-  const results = await algokit.searchTransactions(indexerClient, (s) => s.applicationID(xGov1App))
+  const results = await algokit.searchTransactions(
+    indexerClient,
+    (s) => s.applicationID(xGov1App),
+    5000
+  )
   // console.debug(results)
 
   const voteTxns = results.transactions.filter(
@@ -133,6 +137,10 @@ export function createSessionResults(
     voteRecords.forEach((v) => {
       sessionResultData.questionResults[v.proposalIndex].totalVotes =
         sessionResultData.questionResults[v.proposalIndex].totalVotes + v.votes || v.votes
+      if (v.votes > 0) {
+        sessionResultData.questionResults[v.proposalIndex].numVoters =
+          sessionResultData.questionResults[v.proposalIndex].numVoters + 1 || 1
+      }
       if (
         sessionResultData.questionResults[v.proposalIndex].totalVotes >
           sessionResultData.questionResults[v.proposalIndex].metadata.threshold &&
@@ -158,10 +166,10 @@ export function enrichVoteRecords(sessionResults: SessionResults, voteRecords: V
         v.voteRound > sessionResults.questionResults[v.proposalIndex].passedRound ||
         v.proposal === "01"
       ) {
-        v.effect = "Above Threshold (No Effect)"
+        v.effect = "No Effect - Above Threshold"
         return v
       } else {
-        v.effect = "Below Threshold (Contributed Toward Passing)"
+        v.effect = "Contributed To Passing - Below Threshold"
         return v
       }
     })
@@ -188,5 +196,26 @@ export async function getVotingData(): Promise<VotingData> {
     }
   } catch (e) {
     console.error(e)
+  }
+}
+
+export function createVotesCSV(votes: VoteRecord[]) {
+  const csvRows: string[] = []
+  const fields = Object.keys(votes[0])
+  csvRows.push(fields.join(","))
+  for (const vote of votes) {
+    const values = fields.map((field) => {
+      const val = vote[field]
+      return `${val}`
+    })
+    csvRows.push(values.join(","))
+  }
+  const fileContent = csvRows.join("\n")
+  const filename = "xGov_1_votes.csv"
+  let blob = new Blob([fileContent], { type: "text/csv;charset=utf-8;" })
+  let url = URL.createObjectURL(blob)
+  return {
+    filename,
+    url,
   }
 }

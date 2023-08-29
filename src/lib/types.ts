@@ -15,7 +15,7 @@ export type VoteRecord = {
   voterWeight: number
   voteRound: number
   voteRoundTime: number
-  effect?: "Above Threshold (No Effect)" | "Below Threshold (Contributed Toward Passing)"
+  effect?: "No Effect - Above Threshold" | "Contributed To Passing - Below Threshold"
 }
 
 export type Created = {
@@ -60,6 +60,7 @@ export interface SessionData {
 
 export interface QuestionResult extends Question {
   totalVotes?: number
+  numVoters?: number
   passedRound?: number
   passedTime?: number
   proposalIndex?: number

@@ -1,8 +1,9 @@
 import { Accordion, Button } from "@kobalte/core"
-import * as Plot from "@observablehq/plot"
-import { For, Suspense, createResource, createSignal, onCleanup } from "solid-js"
+import { plot, barY, text, dotY } from "@observablehq/plot"
+import { For, Show, Suspense, createMemo, createResource, createSignal, onCleanup } from "solid-js"
 import { Question, SessionData, VotingData } from "./lib/types"
-import { getVotingData, proposals } from "./lib/api"
+import { createVotesCSV, getVotingData, proposals } from "./lib/api"
+import algonode from "./assets/algonode.png"
 
 function numberWithCommas(num: number | string): string {
   const num_parts = num.toString().split(".")
@@ -66,6 +67,11 @@ function App() {
     timeBetweenDates(new Date(sessionData()?.end).valueOf()).timeData
   )
   const [proposal] = createResource(expandedItem, getProposal)
+  const csv = createMemo(() => {
+    if (votingData()?.votes.length) {
+      return createVotesCSV(votingData()?.votes)
+    } else return null
+  })
 
   const timer = setInterval(() => {
     setTimerDetails(timeBetweenDates(new Date(sessionData()?.end).valueOf()).timeData)
@@ -167,65 +173,75 @@ function App() {
     setSort("name")
   }
 
-  // How many total votes did each proposal receive?  What was their effect?
-  function votesByProposal(votingData: VotingData) {
-    return (
-      votingData &&
-      Plot.plot({
-        title: "Total Vote Weight By Proposal",
-        color: { legend: true, scheme: "Greys" },
+  function votesByEffect(votingData: VotingData) {
+    if (votingData) {
+      const { filename, url } = createVotesCSV(votingData.votes)
+      const votesChart = plot({
+        title: "Supporting Votes By Weight And Proposal",
+        subtitle: "Votes shaded by effect on proposal outcome",
+        color: { legend: true, scheme: "greys", reverse: true },
         style: { background: "none" },
-        marginLeft: 120,
+        marginLeft: 110,
         width: 1000,
         x: { type: "band", label: "Proposal", domain: proposals },
         y: { grid: true },
         marks: [
-          Plot.barY(votingData?.votes, {
+          barY(votingData?.votes, {
             x: "proposal",
             y: "votes",
-            fill: "effect",
+            fill: "effect", //(d) => (d.effect === "No Effect - Above Threshold" ? "grey" : "black"),
             sort: "effect",
-            reverse: true,
             tip: "xy",
-            title: (d) => `${d.address}`,
+            title: "address",
           }),
         ],
       })
-    )
+      return votesChart
+    }
   }
 
-  function passingPercentage(votingData: VotingData) {
+  function votesVsThrehold(votingData: VotingData) {
     if (votingData) {
-      const actualProposals = proposals
+      const actualProposals = structuredClone(proposals)
       actualProposals.pop()
-      const proposalsToGraph = votingData.results.questionResults
+      const proposalsToGraph = structuredClone(votingData.results.questionResults)
       proposalsToGraph.pop()
-      return Plot.plot({
-        title: "Voting Weight vs Threshold by Proposal",
-        color: { legend: true, scheme: "Greys" },
+      return plot({
+        title: "Total Supporting Voting Weight vs Passing Threshold By Proposal",
+        subtitle: "Support annovated with percent of passing threshold",
+        color: { legend: true },
         style: { background: "none" },
-        marginLeft: 120,
+        marginLeft: 110,
         width: 1000,
         x: { type: "band", label: "Proposal", domain: actualProposals },
-        y: { percent: true },
         marks: [
-          Plot.barY(proposalsToGraph, {
+          barY(proposalsToGraph, {
             x: "proposal",
             y: "totalVotes",
             fill: "grey",
           }),
-          Plot.dotY(proposalsToGraph, {
+          dotY(proposalsToGraph, {
             x: "proposal",
             y: "threshold",
             tip: "xy",
             title: (d) => `${Math.round((d.totalVotes / d.threshold) * 100)}%`,
+            symbol: (d) => (d.totalVotes > d.threshold ? "star" : "circle"),
+            fill: (d) => (d.totalVotes > d.threshold ? "currentColor" : "none"),
+            stroke: (d) => (d.totalVotes > d.threshold ? "none" : "currentColor"),
           }),
-          // Plot.text(proposalsToGraph, {
-          //   text: (d) => `${Math.round((d.totalVotes / d.threshold) * 100)}%`,
-          //   x: "proposal",
-          //   y: "totalVotes",
-          //   textAnchor: "end",
-          // }),
+          text(proposalsToGraph, {
+            text: (d) =>
+              `${Math.round((d.totalVotes / d.threshold) * 100)}% Support${
+                d.totalVotes > d.threshold ? " (Passed)" : ""
+              }`,
+            x: "proposal",
+            y: "totalVotes",
+            dx: 6,
+            dy: -5,
+            rotate: 270,
+            textAnchor: "start",
+            lineAnchor: "top",
+          }),
         ],
       })
     }
@@ -236,7 +252,7 @@ function App() {
       <header class="sticky top-0 z-50 border-b-[0.5px] border-black bg-neutral-200">
         <div class="mx-auto flex max-w-screen-lg flex-col flex-wrap items-center justify-between px-4 py-2 md:flex-row">
           <div class="flex">
-            <h1 class="my-2 flex text-2xl font-bold">xGov Proposals Viewer</h1>
+            <h1 class="my-2 flex font-bold">xGov Proposals Viewer</h1>
           </div>
           <div class="flex items-center gap-2">
             <Button.Root
@@ -319,9 +335,9 @@ function App() {
         </div>
       </header>
       <div class="mx-auto flex w-full max-w-screen-lg flex-col gap-2 p-2">
-        <div class="rounded-xl p-2">
+        <div class="rounded-xl border-[0.5px] border-black p-2">
           <Suspense fallback={<span>Loading session details...</span>}>
-            <p class="font-semibold">Algorand xGov Session Details</p>
+            <h2 class="font-semibold">Algorand xGov Session Details</h2>
             <p class="font-semibold">
               Session Title: <span class="font-light">{sessionData()?.title}</span>
             </p>
@@ -359,10 +375,28 @@ function App() {
             <p class="font-semibold">Click the tiles to view full proposal text</p>
           </Suspense>
         </div>
-        <Suspense fallback={<div class="p-2">Analyzing voting data...</div>}>
-          <div class="p-2">{votesByProposal(votingData())}</div>
-          <div class="p-2">{passingPercentage(votingData())}</div>
-        </Suspense>
+
+        <div class="rounded-xl border-[0.5px] border-black p-2">
+          <Suspense fallback={<div class="p-2">Generating graph... 📊</div>}>
+            {votesByEffect(votingData())}
+          </Suspense>
+        </div>
+        <Show when={csv()}>
+          <Button.Root class="flex h-12 rounded-lg border-[0.5px] border-black px-3 py-2 text-xl hover:bg-neutral-300 active:bg-neutral-400">
+            <a
+              href={csv().url}
+              download={csv().filename}
+            >
+              Download votes data as .csv file
+            </a>
+          </Button.Root>
+        </Show>
+        <div class="rounded-xl border-[0.5px] border-black p-2">
+          <Suspense fallback={<div class="p-2">Generating graph... 📊</div>}>
+            {votesVsThrehold(votingData())}
+          </Suspense>
+        </div>
+
         <Accordion.Root
           collapsible
           class="flex flex-col gap-2"
@@ -402,11 +436,27 @@ function App() {
           </For>
         </Accordion.Root>
       </div>
-      <footer class="flex flex-row justify-center gap-2 p-8">
-        <p class="font-light">Made with &#9829; by SilentRhetoric</p>
+      <footer class="flex flex-col justify-center gap-2 px-4 py-8 font-light">
+        <a
+          href="https://x.com/silentrhetoric"
+          target="_blank"
+          class="flex flex-row"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            class="fill-primary h-6 w-6"
+          >
+            <g>
+              <path d="M14.258 10.152L23.176 0h-2.113l-7.747 8.813L7.133 0H0l9.352 13.328L0 23.973h2.113l8.176-9.309 6.531 9.309h7.133zm-2.895 3.293l-.949-1.328L2.875 1.56h3.246l6.086 8.523.945 1.328 7.91 11.078h-3.246zm0 0"></path>
+            </g>
+          </svg>
+          <p class="ml-2">Made with &#9829; by SilentRhetoric</p>{" "}
+        </a>
         <a
           href="https://github.com/SilentRhetoric/xGov-viewer"
           aria-label="GitHub repository"
+          target="_blank"
+          class="flex flex-row"
         >
           <svg
             width="25"
@@ -419,6 +469,19 @@ function App() {
               d="M12.846 0c-6.63 0-12 5.506-12 12.303 0 5.445 3.435 10.043 8.205 11.674.6.107.825-.262.825-.585 0-.292-.015-1.261-.015-2.291-3.015.569-3.795-.754-4.035-1.446-.135-.354-.72-1.446-1.23-1.738-.42-.23-1.02-.8-.015-.815.945-.015 1.62.892 1.845 1.261 1.08 1.86 2.805 1.338 3.495 1.015.105-.8.42-1.338.765-1.645-2.67-.308-5.46-1.37-5.46-6.075 0-1.338.465-2.446 1.23-3.307-.12-.308-.54-1.569.12-3.26 0 0 1.005-.323 3.3 1.26.96-.276 1.98-.415 3-.415s2.04.139 3 .416c2.295-1.6 3.3-1.261 3.3-1.261.66 1.691.24 2.952.12 3.26.765.861 1.23 1.953 1.23 3.307 0 4.721-2.805 5.767-5.475 6.075.435.384.81 1.122.81 2.276 0 1.645-.015 2.968-.015 3.383 0 .323.225.707.825.585a12.047 12.047 0 0 0 5.919-4.489 12.537 12.537 0 0 0 2.256-7.184c0-6.798-5.37-12.304-12-12.304Z"
             ></path>
           </svg>
+          <p class="ml-2 flex">Contribute to this open source project</p>
+        </a>
+        <a
+          href="https://algonode.io"
+          aria-label="AlgoNode"
+          target="_blank"
+          class="flex flex-row"
+        >
+          <img
+            src={algonode}
+            class="m-[-3px] h-8 w-8"
+          />
+          <p class="ml-2">Indexer Powered by AlgoNode</p>
         </a>
       </footer>
     </div>
