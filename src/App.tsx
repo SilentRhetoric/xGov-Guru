@@ -208,8 +208,8 @@ function App() {
       proposalsToGraph.pop()
       return plot({
         title: "Total Supporting Voting Weight vs Passing Threshold By Proposal",
-        subtitle: "Threshol markers filled to incidate proposals already passed",
-        // symbol: { legend: true },
+        subtitle: "Proposals shaded to incidate ones already passed",
+        color: { legend: true, scheme: "Greys" },
         style: { background: "none" },
         marginLeft: 110,
         width: 1000,
@@ -218,7 +218,7 @@ function App() {
           barY(proposalsToGraph, {
             x: "proposal",
             y: "totalVotes",
-            fill: "grey",
+            fill: "passed",
           }),
           dotY(proposalsToGraph, {
             x: "proposal",

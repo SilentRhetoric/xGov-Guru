@@ -66,7 +66,7 @@ export interface QuestionResult extends Question {
   proposalIndex?: number
   proposal?: string
   threshold?: number
-  passed?: boolean
+  passed?: "Passed" | "Not Passed"
 }
 
 export interface SessionResults extends SessionData {

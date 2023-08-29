@@ -133,7 +133,7 @@ export function createSessionResults(
     sessionResultData.questionResults.forEach((q, i) => (q.proposalIndex = i))
     sessionResultData.questionResults.forEach((q, i) => (q.proposal = proposals[i]))
     sessionResultData.questionResults.forEach((q, i) => (q.threshold = q.metadata.threshold))
-    sessionResultData.questionResults.forEach((q, i) => (q.passed = false))
+    sessionResultData.questionResults.forEach((q, i) => (q.passed = "Not Passed"))
     voteRecords.forEach((v) => {
       sessionResultData.questionResults[v.proposalIndex].totalVotes =
         sessionResultData.questionResults[v.proposalIndex].totalVotes + v.votes || v.votes
@@ -149,7 +149,7 @@ export function createSessionResults(
       ) {
         sessionResultData.questionResults[v.proposalIndex].passedRound = v.voteRound
         sessionResultData.questionResults[v.proposalIndex].passedTime = v.voteRoundTime
-        sessionResultData.questionResults[v.proposalIndex].passed = true
+        sessionResultData.questionResults[v.proposalIndex].passed = "Passed"
       }
     })
     return sessionResultData
