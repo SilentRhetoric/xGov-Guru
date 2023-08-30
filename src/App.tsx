@@ -73,10 +73,10 @@ function App() {
     } else return null
   })
 
-  // const timer = setInterval(() => {
-  //   setTimerDetails(timeBetweenDates(new Date(sessionData()?.end).valueOf()).timeData)
-  // }, 1000)
-  // onCleanup(() => clearInterval(timer))
+  const timer = setInterval(() => {
+      setTimerDetails(timeBetweenDates(new Date(sessionData()?.end).valueOf()).timeData)
+  }, 1000)
+  onCleanup(() => clearInterval(timer))
 
   async function fetchSessionData(): Promise<SessionData> {
     const text = await fetch(
