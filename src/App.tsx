@@ -73,10 +73,10 @@ function App() {
     } else return null
   })
 
-  const timer = setInterval(() => {
-    setTimerDetails(timeBetweenDates(new Date(sessionData()?.end).valueOf()).timeData)
-  }, 1000)
-  onCleanup(() => clearInterval(timer))
+  // const timer = setInterval(() => {
+  //   setTimerDetails(timeBetweenDates(new Date(sessionData()?.end).valueOf()).timeData)
+  // }, 1000)
+  // onCleanup(() => clearInterval(timer))
 
   async function fetchSessionData(): Promise<SessionData> {
     const text = await fetch(
@@ -249,7 +249,7 @@ function App() {
   function votesBar(question: Question) {
     if (votingData()?.votes) {
       const proposalVotes = votingData()
-        ?.votes.filter((v) => v.proposalIndex === question.proposalIndex && v.votes > 0)
+        ?.votes.filter((v) => v.proposalIndex === question.proposalIndex)
         .reduce((acc, v, i) => {
           v.percentOfThreshold = v.votes / question.metadata.threshold
           acc.push(v)
@@ -261,7 +261,7 @@ function App() {
         width: 1000,
         style: { background: "none" },
         marks: [
-          barX(proposalVotes, stackX({ x: "percentOfThreshold", fill: "black", stroke: "white" })),
+          barX(proposalVotes, stackX({ x: "percentOfThreshold", fill: "#636363" })),
           ruleX([0, 1]),
         ],
       })

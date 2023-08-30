@@ -87,17 +87,20 @@ export async function getVoterInfo(): Promise<VoterInfo[]> {
 // Map over all voter info and break out the votes array into individual vote records by proposal
 export function createVoteRecords(allVotersInfo: VoterInfo[]): VoteRecord[] {
   const allVoteRecords = allVotersInfo.flatMap((voterInfo, i) => {
-    const voteRecords = voterInfo.voteWeights.map((vote, j) => {
-      return {
-        address: voterInfo.address,
-        proposal: proposals[j],
-        proposalIndex: j,
-        votes: Number(vote),
-        voterWeight: Number(voterInfo.voterWeight),
-        voteRound: voterInfo.voteRound,
-        voteRoundTime: voterInfo.voteRoundTime,
-      }
-    })
+    const voteRecords = voterInfo.voteWeights
+      .map((vote, j) => {
+        return {
+          address: voterInfo.address,
+          proposal: proposals[j],
+          proposalIndex: j,
+          votes: Number(vote),
+          voterWeight: Number(voterInfo.voterWeight),
+          voteRound: voterInfo.voteRound,
+          voteRoundTime: voterInfo.voteRoundTime,
+        }
+      })
+      .filter((vote) => vote.votes > 0)
+
     return voteRecords
   })
   return allVoteRecords
