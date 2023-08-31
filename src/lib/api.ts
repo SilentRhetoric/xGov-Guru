@@ -45,32 +45,33 @@ export async function getVoterInfo(): Promise<VoterInfo[]> {
     5000
   )
   // console.debug(results)
-
   const voteTxns = results.transactions.filter(
     (t) => t["application-transaction"]["application-args"][0] === "xA/9qg=="
   )
   // console.debug("Transactions: ", txns)
-
+  const voteWeightsType = new ABIArrayDynamicType(new ABIUintType(64))
   const allVotersInfo = voteTxns.map((txn) => {
     const address = txn.sender
-
     // Get the vote arrays from the application arguments
     const args = txn["application-transaction"]["application-args"]
     const votesEncoded = args[args.length - 2] // Second to last arg has the votes
     // console.debug("Vote weights encoded: ", voteWeights)
-
     // Decode the vote weights array using ABI decoding
-    const voteWeightsType = new ABIArrayDynamicType(new ABIUintType(64))
     const voteWeights = voteWeightsType.decode(
       new Uint8Array(Buffer.from(votesEncoded, "base64"))
     ) as bigint[]
     // console.debug("Vote weights: ", voteWeights)
-
     const voterWeight = Number(voteWeights.reduce((partialSum, w) => partialSum + w, 0n))
     const relativeWeight = voterWeight / totalVotingWeight
     const voteRound = txn["confirmed-round"]
     const voteRoundTime = txn["round-time"]
-
+    const numVotes = Number(
+      voteWeights.reduce((count, vote) => {
+        if (Number(vote) > 0) {
+          return (count += 1)
+        } else return count
+      }, 0)
+    )
     const voterInfo = {
       address,
       voteWeights,
@@ -78,6 +79,7 @@ export async function getVoterInfo(): Promise<VoterInfo[]> {
       relativeWeight,
       voteRound,
       voteRoundTime,
+      numVotes,
     }
     return voterInfo
   })
@@ -169,10 +171,10 @@ export function enrichVoteRecords(sessionResults: SessionResults, voteRecords: V
         v.voteRound > sessionResults.questionResults[v.proposalIndex].passedRound ||
         v.proposal === "01"
       ) {
-        v.effect = "No Effect - Above Threshold"
+        v.effect = "No Effect - Already Passed/Mock Proposal"
         return v
       } else {
-        v.effect = "Contributed To Passing - Below Threshold"
+        v.effect = "Contributed To Passing - Not Yet Passed"
         return v
       }
     })

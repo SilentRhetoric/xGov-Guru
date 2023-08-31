@@ -1,5 +1,16 @@
 import { Accordion, Button } from "@kobalte/core"
-import { plot, barY, text, dotY, barX, stackX, ruleX } from "@observablehq/plot"
+import {
+  plot,
+  barY,
+  text,
+  dotY,
+  barX,
+  stackX,
+  ruleX,
+  rectY,
+  binX,
+  groupX,
+} from "@observablehq/plot"
 import { For, Show, Suspense, createMemo, createResource, createSignal, onCleanup } from "solid-js"
 import { Question, SessionData, VotingData } from "./lib/types"
 import { createVotesCSV, getVotingData, proposals } from "./lib/api"
@@ -63,18 +74,18 @@ function App() {
   const [questions, setQuestions] = createSignal<Question[]>([])
   const [expandedItem, setExpandedItem] = createSignal([""])
   const [sort, setSort] = createSignal("")
-  const [timerDetails, setTimerDetails] = createSignal(
-    timeBetweenDates(new Date(sessionData()?.end).valueOf()).timeData
-  )
   const [proposal] = createResource(expandedItem, getProposal)
   const csv = createMemo(() => {
     if (votingData()?.votes.length) {
       return createVotesCSV(votingData()?.votes)
     } else return null
   })
+  const [timerDetails, setTimerDetails] = createSignal(
+    timeBetweenDates(new Date(sessionData()?.end).valueOf()).timeData
+  )
 
   const timer = setInterval(() => {
-      setTimerDetails(timeBetweenDates(new Date(sessionData()?.end).valueOf()).timeData)
+    setTimerDetails(timeBetweenDates(new Date(sessionData()?.end).valueOf()).timeData)
   }, 1000)
   onCleanup(() => clearInterval(timer))
 
@@ -176,11 +187,10 @@ function App() {
 
   function votesByEffect(votingData: VotingData) {
     if (votingData) {
-      const { filename, url } = createVotesCSV(votingData.votes)
-      const votesChart = plot({
-        title: "Supporting Votes By Weight And Proposal",
-        subtitle: "Votes shaded by effect on proposal outcome",
-        color: { legend: true, scheme: "greys", reverse: true },
+      return plot({
+        title: "Supporting Votes By Proposal, Weight, and Effect",
+        subtitle: "How did votes contribute or not contribute to passing proposals?",
+        color: { legend: true, scheme: "RdBu", reverse: true },
         style: { background: "none" },
         marginLeft: 110,
         width: 1000,
@@ -190,14 +200,14 @@ function App() {
           barY(votingData?.votes, {
             x: "proposal",
             y: "votes",
-            fill: "effect", //(d) => (d.effect === "No Effect - Above Threshold" ? "grey" : "black"),
+            fill: "effect", //(d) => (d.effect === "No Effect - Already Passed/Mock Proposal" ? "grey" : "black"),
             sort: "effect",
+            // stroke: "none",
             // tip: "xy",
             // title: "address",
           }),
         ],
       })
-      return votesChart
     }
   }
 
@@ -209,8 +219,8 @@ function App() {
       proposalsToGraph.pop()
       return plot({
         title: "Total Supporting Voting Weight vs Passing Threshold By Proposal",
-        subtitle: "Proposals shaded to incidate ones already passed",
-        color: { legend: true, scheme: "Greys" },
+        subtitle: "Which proposals have passed?  How close are others to passing?",
+        color: { legend: true, scheme: "PRGn" },
         style: { background: "none" },
         marginLeft: 110,
         width: 1000,
@@ -246,6 +256,42 @@ function App() {
     }
   }
 
+  function accountsByProposal(votingData: VotingData) {
+    if (votingData) {
+      return plot({
+        title: "Unique Accounts Supporting Each Proposal",
+        subtitle: "How many different accounts supported each proposal?",
+        style: { background: "none" },
+        width: 1000,
+        x: { domain: proposals, label: "Proposals" },
+        y: { label: "# of Unique Accounts" },
+        marks: [
+          barY(votingData?.results.questionResults, {
+            x: "proposal",
+            y: "numVoters",
+            fill: "turquoise",
+          }),
+        ],
+      })
+    }
+  }
+
+  function votesPerVoter(votingData: VotingData) {
+    if (votingData) {
+      return plot({
+        title: "Frequency of Number of Proposals Supported by Account",
+        subtitle: "How many different proposals did individual accounts support?",
+        style: { background: "none" },
+        width: 1000,
+        x: { label: "# Proposals Supported" },
+        y: { label: "# of Unique Accounts" },
+        marks: [
+          barY(votingData?.voters, groupX({ y: "count" }, { x: "numVotes", fill: "tomato" })),
+        ],
+      })
+    }
+  }
+
   function votesBar(question: Question) {
     if (votingData()?.votes) {
       const proposalVotes = votingData()
@@ -256,7 +302,7 @@ function App() {
           return acc
         }, [])
         .sort((a, b) => a.votes - b.votes)
-      const bar = plot({
+      return plot({
         x: { percent: true },
         width: 1000,
         style: { background: "none" },
@@ -265,7 +311,6 @@ function App() {
           ruleX([0, 1]),
         ],
       })
-      return bar
     }
   }
 
@@ -274,11 +319,11 @@ function App() {
       <header class="sticky top-0 z-50 border-b-[0.5px] border-black bg-neutral-200">
         <div class="mx-auto flex max-w-screen-lg flex-col flex-wrap items-center justify-between px-4 py-2 md:flex-row">
           <div class="flex">
-            <h1 class="my-2 flex font-bold">xGov Proposals Viewer</h1>
+            <h1 class="my-2 flex font-bold">xGov Viewer</h1>
           </div>
           <div class="flex items-center gap-2">
             <Button.Root
-              class="flex h-12 w-12 items-center justify-center rounded-lg border-[0.5px] border-black px-3 py-2 text-xl font-semibold hover:bg-neutral-300 active:bg-neutral-400"
+              class="flex h-12 w-12 items-center justify-center rounded-xl border-[0.5px] border-black px-3 py-2 text-xl font-semibold hover:bg-neutral-300 active:bg-neutral-400"
               onClick={sortName}
               aria-label="Sort by number"
             >
@@ -299,7 +344,7 @@ function App() {
               />
             </svg>
             <Button.Root
-              class="flex h-12 w-12 items-center justify-center rounded-lg border-[0.5px] border-black px-2 py-2 hover:bg-neutral-300 active:bg-neutral-400"
+              class="flex h-12 w-12 items-center justify-center rounded-xl border-[0.5px] border-black px-2 py-2 hover:bg-neutral-300 active:bg-neutral-400"
               onClick={sortAmount}
               aria-label="Sort by amount"
             >
@@ -332,7 +377,7 @@ function App() {
               </svg>
             </Button.Root>
             <a
-              class="flex h-12 w-24 items-center justify-center rounded-lg border-[0.5px] border-black px-2 py-2 text-xl font-light hover:bg-neutral-300 active:bg-neutral-400"
+              class="flex h-12 w-24 items-center justify-center rounded-xl border-[0.5px] border-black px-2 py-2 text-xl font-light hover:bg-neutral-300 active:bg-neutral-400"
               href="https://xgov.algorand.foundation/vote/1158913461"
               target="_blank"
               rel="noopener noreferrer"
@@ -397,27 +442,50 @@ function App() {
             <p class="">Click the tiles to view full proposal text</p>
           </Suspense>
         </div>
-        <div class="rounded-xl border-[0.5px] border-black p-2">
-          <Suspense fallback={<div class="p-2">Generating graph... 📊</div>}>
+        <Suspense
+          fallback={
+            <div class="rounded-xl border-[0.5px] border-black p-2">Generating graphs... 📊</div>
+          }
+        >
+          {/* <Button.Root onClick={() => logNFds()}>Log NFDs</Button.Root> */}
+          <Show when={csv()}>
+            <a
+              href={csv().url}
+              download={csv().filename}
+              class="flex"
+            >
+              <Button.Root class="flex h-12 w-full gap-2 rounded-xl border-[0.5px] border-black px-3 py-2 text-xl hover:bg-neutral-300 active:bg-neutral-400">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.5"
+                  stroke="currentColor"
+                  class="h-6 w-6"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M9 8.25H7.5a2.25 2.25 0 00-2.25 2.25v9a2.25 2.25 0 002.25 2.25h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25H15M9 12l3 3m0 0l3-3m-3 3V2.25"
+                  />
+                </svg>
+                <p class="font-light">Download votes data as .csv file</p>
+              </Button.Root>
+            </a>
+          </Show>
+          <div class="rounded-xl border-[0.5px] border-black p-2">
             {votesByEffect(votingData())}
-          </Suspense>
-        </div>
-        <Show when={csv()}>
-          <a
-            href={csv().url}
-            download={csv().filename}
-            class="flex"
-          >
-            <Button.Root class="flex h-12 w-full rounded-lg border-[0.5px] border-black px-3 py-2 text-xl hover:bg-neutral-300 active:bg-neutral-400">
-              Download votes data as .csv file
-            </Button.Root>
-          </a>
-        </Show>
-        <div class="rounded-xl border-[0.5px] border-black p-2">
-          <Suspense fallback={<div class="p-2">Generating graph... 📊</div>}>
+          </div>
+          <div class="rounded-xl border-[0.5px] border-black p-2">
             {votesVsThrehold(votingData())}
-          </Suspense>
-        </div>
+          </div>
+          <div class="rounded-xl border-[0.5px] border-black p-2">
+            {accountsByProposal(votingData())}
+          </div>
+          <div class="rounded-xl border-[0.5px] border-black p-2">
+            {votesPerVoter(votingData())}
+          </div>
+        </Suspense>
         <Accordion.Root
           collapsible
           class="flex flex-col gap-2"

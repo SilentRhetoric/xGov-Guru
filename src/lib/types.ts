@@ -5,6 +5,7 @@ export type VoterInfo = {
   relativeWeight: number
   voteRound: number
   voteRoundTime: number
+  numVotes: number
 }
 
 export type VoteRecord = {
@@ -15,7 +16,7 @@ export type VoteRecord = {
   voterWeight: number
   voteRound: number
   voteRoundTime: number
-  effect?: "No Effect - Above Threshold" | "Contributed To Passing - Below Threshold"
+  effect?: "No Effect - Already Passed/Mock Proposal" | "Contributed To Passing - Not Yet Passed"
   percentOfThreshold?: number
 }
 
