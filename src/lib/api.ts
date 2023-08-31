@@ -42,6 +42,7 @@ export const proposals = [
   "49",
   "01",
 ]
+// const totalFunding = 60102
 
 // Retrieve relevant vote txns from an indexer and create voter info from them
 export async function getVoterInfo(): Promise<VoterInfo[]> {
@@ -190,7 +191,10 @@ export function enrichVoteRecords(sessionResults: SessionResults, voteRecords: V
   // console.debug("All vote records: ", allVoteRecords)
   if (sessionResults && voteRecords) {
     const enrichedVoteRecords = voteRecords.map((v, i) => {
-      if (sessionResults.questionResults[v.proposalIndex].passedRound === null) {
+      if (
+        sessionResults.questionResults[v.proposalIndex].passedRound === null &&
+        v.proposal !== "01"
+      ) {
         v.effect = "Contributed To Passing - Proposal Did Not Pass"
         return v
       } else if (

@@ -273,7 +273,7 @@ function App() {
       return plot({
         title: "Supporting Votes By Proposal, Weight, and Effect",
         subtitle: "How did votes contribute or not contribute to passing proposals?",
-        color: { legend: true, scheme: "BuYlRd", reverse: true },
+        color: { legend: true, scheme: "YlGnBu", reverse: true },
         style: { background: "none" },
         marginLeft: 110,
         width: 1000,
