@@ -522,7 +522,9 @@ function App() {
                 {timerDetails().seconds}s
               </span>
             </p>
-            <p class="">Click the tiles to view full proposal text</p>
+            <p class="font-light">
+              Click the proposal tiles below the graphs to view full information about each proposal
+            </p>
           </Suspense>
         </div>
         <Suspense
