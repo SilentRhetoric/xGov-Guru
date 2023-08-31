@@ -1,11 +1,17 @@
 import * as algokit from "@algorandfoundation/algokit-utils"
 import { ABIArrayDynamicType, ABIUintType } from "algosdk"
 import { Buffer } from "buffer"
-import { SessionData, SessionResults, VoteRecord, VoterInfo, VotingData } from "./types"
+import {
+  GovernorsData,
+  SessionData,
+  SessionResults,
+  VoteRecord,
+  VoterInfo,
+  VotingData,
+} from "./types"
 
 const indexerClient = algokit.getAlgoIndexerClient(algokit.getAlgoNodeConfig("mainnet", "indexer"))
 const xGov1App = 1158913461
-const totalVoters = 4765
 const totalVotingWeight = 2139007219936
 export const proposals = [
   "06",
@@ -124,6 +130,15 @@ export async function getSessionData(): Promise<SessionData> {
   return sessionData
 }
 
+export async function getGovernorsData(): Promise<GovernorsData> {
+  const text = await fetch(
+    `https://api.voting.algorand.foundation/ipfs/bafkreieh77pgmvfexyxbnbexwu4n5x54kgdfop7lzfo26peyrjcwhn6uii`
+  ).then((response) => response.text())
+  const governorsData: GovernorsData = JSON.parse(text)
+  // console.debug(governorsData)
+  return governorsData
+}
+
 // Loop over the vote records and tally up cumulative votes on each proposal
 // If the vote pushed the proposal past the passing threshold, update the round and time it passed
 export function createSessionResults(
@@ -135,10 +150,18 @@ export function createSessionResults(
   if (sessionData && voteRecords) {
     const sessionResultData = sessionData as SessionResults
     sessionResultData.questionResults = sessionResultData.questions
-    sessionResultData.questionResults.forEach((q, i) => (q.proposalIndex = i))
+    sessionResultData.questionResults.forEach((q, i) => {
+      q.proposalIndex = i
+      q.proposal = proposals[i]
+      q.threshold = q.metadata.threshold
+      q.passed = "Not Passed"
+      q.passedRound = null
+      q.passedTime = null
+    })
     sessionResultData.questionResults.forEach((q, i) => (q.proposal = proposals[i]))
     sessionResultData.questionResults.forEach((q, i) => (q.threshold = q.metadata.threshold))
     sessionResultData.questionResults.forEach((q, i) => (q.passed = "Not Passed"))
+
     voteRecords.forEach((v) => {
       sessionResultData.questionResults[v.proposalIndex].totalVotes =
         sessionResultData.questionResults[v.proposalIndex].totalVotes + v.votes || v.votes
@@ -149,8 +172,8 @@ export function createSessionResults(
       if (
         sessionResultData.questionResults[v.proposalIndex].totalVotes >
           sessionResultData.questionResults[v.proposalIndex].metadata.threshold &&
-        sessionResultData.questionResults[v.proposalIndex].passedRound === undefined &&
-        sessionResultData.questionResults[v.proposalIndex].passedTime === undefined
+        sessionResultData.questionResults[v.proposalIndex].passedRound === null &&
+        sessionResultData.questionResults[v.proposalIndex].passedTime === null
       ) {
         sessionResultData.questionResults[v.proposalIndex].passedRound = v.voteRound
         sessionResultData.questionResults[v.proposalIndex].passedTime = v.voteRoundTime
@@ -167,14 +190,21 @@ export function enrichVoteRecords(sessionResults: SessionResults, voteRecords: V
   // console.debug("All vote records: ", allVoteRecords)
   if (sessionResults && voteRecords) {
     const enrichedVoteRecords = voteRecords.map((v, i) => {
-      if (
-        v.voteRound > sessionResults.questionResults[v.proposalIndex].passedRound ||
+      if (sessionResults.questionResults[v.proposalIndex].passedRound === null) {
+        v.effect = "Contributed To Passing - Proposal Did Not Pass"
+        return v
+      } else if (
+        (sessionResults.questionResults[v.proposalIndex].passedRound > 0 &&
+          v.voteRound > sessionResults.questionResults[v.proposalIndex].passedRound) ||
         v.proposal === "01"
       ) {
         v.effect = "No Effect - Already Passed/Mock Proposal"
         return v
-      } else {
-        v.effect = "Contributed To Passing - Not Yet Passed"
+      } else if (
+        sessionResults.questionResults[v.proposalIndex].passedRound > 0 &&
+        v.voteRound <= sessionResults.questionResults[v.proposalIndex].passedRound
+      ) {
+        v.effect = "Contributed To Passing - Proposal Passed"
         return v
       }
     })
@@ -188,13 +218,16 @@ export async function getVotingData(): Promise<VotingData> {
   try {
     const voterInfo = await getVoterInfo()
     const sessiondata = await getSessionData()
+    const governorsData = await getGovernorsData()
     const voteRecords = createVoteRecords(voterInfo)
     const sessionResults = createSessionResults(sessiondata, voteRecords)
     const enrichedVoteRecords = enrichVoteRecords(sessionResults, voteRecords)
     // console.debug("sessionResults: ", sessionResults)
     // console.debug("voterInfo: ", voterInfo)
     // console.debug("enrichedVoteRecords: ", enrichedVoteRecords)
+    // console.debug("governorsData: ", governorsData)
     return {
+      governors: governorsData,
       results: sessionResults,
       voters: voterInfo,
       votes: enrichedVoteRecords,

@@ -10,6 +10,7 @@ import {
   rectY,
   binX,
   groupX,
+  textX,
 } from "@observablehq/plot"
 import { For, Show, Suspense, createMemo, createResource, createSignal, onCleanup } from "solid-js"
 import { Question, SessionData, VotingData } from "./lib/types"
@@ -185,12 +186,94 @@ function App() {
     setSort("name")
   }
 
+  function voterParticipation(votingData: VotingData) {
+    if (votingData) {
+      const data = [
+        {
+          status: "Voted",
+          total: votingData.voters.length,
+          fraction: votingData.voters.length / votingData.governors.snapshot.length,
+        },
+        {
+          status: "Did Not Vote",
+          total: votingData.governors.snapshot.length - votingData.voters.length,
+          fraction:
+            (votingData.governors.snapshot.length - votingData.voters.length) /
+            votingData.governors.snapshot.length,
+        },
+      ]
+      return plot({
+        title: "Voting Participation By Account",
+        subtitle: "How many unique accounts voted or did not vote?",
+        width: 1000,
+        style: { background: "none" },
+        x: { percent: true, label: "Account Participation (%)" },
+        marks: [
+          barX(
+            data,
+            stackX({ x: "fraction", fill: (d) => (d.status === "Voted" ? "green" : "red") })
+          ),
+          textX(
+            data,
+            stackX({
+              x: "fraction",
+              text: (d) => `${d.status} (${d.total}, ${(d.fraction * 100).toFixed(2)}%)`,
+              fill: "white",
+            })
+          ),
+        ],
+      })
+    }
+  }
+
+  function weightParticipation(votingData: VotingData) {
+    if (votingData) {
+      const votedWeight = votingData.voters.reduce((sum, v) => (sum += v.voterWeight), 0)
+      // console.debug("votedWeight: ", votedWeight)
+      const totalWeight = votingData.governors.snapshot.reduce((sum, g) => (sum += g.weight), 0)
+      // console.debug("totalWeight: ", totalWeight)
+      const data = [
+        {
+          status: "Voted",
+          total: votedWeight,
+          fraction: votedWeight / totalWeight,
+        },
+        {
+          status: "Did Not Vote",
+          total: totalWeight - votedWeight,
+          fraction: (totalWeight - votedWeight) / totalWeight,
+        },
+      ]
+      return plot({
+        title: "Voting Participation By Weight",
+        subtitle: "How much voting weight voted or did not vote?",
+        width: 1000,
+        style: { background: "none" },
+        x: { percent: true, label: "Voting Weight Participation (%)" },
+        marks: [
+          barX(
+            data,
+            stackX({ x: "fraction", fill: (d) => (d.status === "Voted" ? "green" : "red") })
+          ),
+          textX(
+            data,
+            stackX({
+              x: "fraction",
+              text: (d) => `${d.status} (${d.total}, ${(d.fraction * 100).toFixed(2)}%)`,
+              fill: "white",
+            })
+          ),
+        ],
+      })
+    }
+  }
+
   function votesByEffect(votingData: VotingData) {
     if (votingData) {
       return plot({
         title: "Supporting Votes By Proposal, Weight, and Effect",
         subtitle: "How did votes contribute or not contribute to passing proposals?",
-        color: { legend: true, scheme: "RdBu", reverse: true },
+        color: { legend: true, scheme: "BuYlRd", reverse: true },
         style: { background: "none" },
         marginLeft: 110,
         width: 1000,
@@ -473,6 +556,12 @@ function App() {
               </Button.Root>
             </a>
           </Show>
+          <div class="rounded-xl border-[0.5px] border-black p-2">
+            {voterParticipation(votingData())}
+          </div>
+          <div class="rounded-xl border-[0.5px] border-black p-2">
+            {weightParticipation(votingData())}
+          </div>
           <div class="rounded-xl border-[0.5px] border-black p-2">
             {votesByEffect(votingData())}
           </div>

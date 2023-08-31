@@ -1,3 +1,16 @@
+export type Governor = {
+  address: string
+  signature: string
+  weight: number
+}
+
+export type GovernorsData = {
+  title: string
+  publicKey: string
+  snapshot: Governor[]
+  created: { at: string; by: string }
+}
+
 export type VoterInfo = {
   address: string
   voteWeights: bigint[]
@@ -16,7 +29,10 @@ export type VoteRecord = {
   voterWeight: number
   voteRound: number
   voteRoundTime: number
-  effect?: "No Effect - Already Passed/Mock Proposal" | "Contributed To Passing - Not Yet Passed"
+  effect?:
+    | "No Effect - Already Passed/Mock Proposal"
+    | "Contributed To Passing - Proposal Passed"
+    | "Contributed To Passing - Proposal Did Not Pass"
   percentOfThreshold?: number
 }
 
@@ -63,8 +79,8 @@ export interface SessionData {
 export interface QuestionResult extends Question {
   totalVotes?: number
   numVoters?: number
-  passedRound?: number
-  passedTime?: number
+  passedRound?: number | null
+  passedTime?: number | null
   proposalIndex?: number
   proposal?: string
   threshold?: number
@@ -76,6 +92,7 @@ export interface SessionResults extends SessionData {
 }
 
 export interface VotingData {
+  governors: GovernorsData
   results: SessionResults
   voters: VoterInfo[]
   votes: VoteRecord[]
