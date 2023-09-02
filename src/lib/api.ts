@@ -100,6 +100,7 @@ export function createVoteRecords(allVotersInfo: VoterInfo[]): VoteRecord[] {
       .map((vote, j) => {
         return {
           address: voterInfo.address,
+          nfd: voterInfo.nfd,
           proposal: proposals[j],
           proposalIndex: j,
           votes: Number(vote),
@@ -220,25 +221,57 @@ export function enrichVoteRecords(sessionResults: SessionResults, voteRecords: V
 // Pulls it all together for a resource that returns all the processed data
 export async function getVotingData(): Promise<VotingData> {
   try {
-    const voterInfo = await getVoterInfo()
+    const votersInfo = await getVoterInfo()
+    const enrichedVotersInfo = await nfdBatchLookup(votersInfo)
     const sessiondata = await getSessionData()
     const governorsData = await getGovernorsData()
-    const voteRecords = createVoteRecords(voterInfo)
+    const voteRecords = createVoteRecords(enrichedVotersInfo)
     const sessionResults = createSessionResults(sessiondata, voteRecords)
     const enrichedVoteRecords = enrichVoteRecords(sessionResults, voteRecords)
     // console.debug("sessionResults: ", sessionResults)
     // console.debug("voterInfo: ", voterInfo)
     // console.debug("enrichedVoteRecords: ", enrichedVoteRecords)
     // console.debug("governorsData: ", governorsData)
+    // console.debug("enrichedVoters: ", enrichedVotersInfo)
     return {
       governors: governorsData,
       results: sessionResults,
-      voters: voterInfo,
+      voters: enrichedVotersInfo,
       votes: enrichedVoteRecords,
     }
   } catch (e) {
     console.error(e)
   }
+}
+
+export async function nfdBatchLookup(voters: VoterInfo[]) {
+  const enrichedVoters = structuredClone(voters)
+  const batchSize = 20
+  for (let i = 0; i < voters.length; i += batchSize) {
+    const batch = voters.slice(i, i + batchSize)
+    const addrParams = batch.map((v) => `address=${v.address}&`).join("")
+    // console.debug("addrParams: ", addrParams)
+    const url = `https://api.nf.domains/nfd/v2/address?${addrParams}limit=1&view=tiny`
+
+    try {
+      const resp = await fetch(url)
+      // console.debug(resp)
+      if (resp.ok) {
+        const responseJson = await resp.json()
+        // console.debug("responseJson: ", responseJson)
+        Object.entries(responseJson).forEach(([addr, data]) => {
+          const name = data[0].name
+          // console.debug("NFD Name: ", name)
+          const index = enrichedVoters.findIndex((v) => v.address === addr)
+          enrichedVoters[index].nfd = name
+          // console.debug(enrichedVoters[index])
+        })
+      }
+    } catch (e) {
+      console.error("NFD address reverse lookup error: ", e)
+    }
+  }
+  return enrichedVoters
 }
 
 export function createVotesCSV(votes: VoteRecord[]) {

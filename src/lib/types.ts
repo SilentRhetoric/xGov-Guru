@@ -19,6 +19,7 @@ export type VoterInfo = {
   voteRound: number
   voteRoundTime: number
   numVotes: number
+  nfd?: string
 }
 
 export type VoteRecord = {

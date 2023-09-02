@@ -286,8 +286,8 @@ function App() {
             fill: "effect", //(d) => (d.effect === "No Effect - Already Passed/Mock Proposal" ? "grey" : "black"),
             sort: "effect",
             // stroke: "none",
-            // tip: "xy",
-            // title: "address",
+            tip: "xy",
+            title: (d) => (d.nfd ? d.nfd : d.address),
           }),
         ],
       })
