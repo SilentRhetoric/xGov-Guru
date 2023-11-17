@@ -11,7 +11,7 @@
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^20.4.8",
-    "algosdk": "^2.5.0",
+    "algosdk": "^2.7.0",
     "autoprefixer": "^10.4.14",
     "postcss": "^8.4.27",
     "prettier": "^2.8.8",
@@ -27,7 +27,7 @@
     "@kobalte/tailwindcss": "^0.6.5",
     "buffer": "^6.0.3",
     "solid-js": "^1.7.9",
-    "@algorandfoundation/algokit-utils": "^2.3.2",
+    "@algorandfoundation/algokit-utils": "^5.0.0",
     "@observablehq/plot": "^0.6.10"
   }
 }
