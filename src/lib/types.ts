@@ -9,6 +9,7 @@ export type GovernorsData = {
   publicKey: string
   snapshot: Governor[]
   created: { at: string; by: string }
+  version: string
 }
 
 export type VoterInfo = {
@@ -65,15 +66,17 @@ export interface Question {
 }
 
 export interface SessionData {
+  communityGrantAllocation: string
   created: Created
   description: string
   end: string
   id: string
-  informationUrl: string
+  informationUrl?: string
   questions: Question[]
   start: string
   title: string
   type: number
+  version: string
   voteGatingSnapshotCid: string
 }
 

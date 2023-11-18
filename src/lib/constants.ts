@@ -1,6 +1,10 @@
 // xGov Period 1
 export const PERIOD_1_APP_ID = 1158913461
 export const PERIOD_1_TOTAL_VOTING_WEIGHT = 2139007219936
+export const PERIOD_1_METADATA =
+  "https://api.voting.algorand.foundation/ipfs/bafkreigjiien52ukmfqd5yrjgonrj6ixpr2rm32szps45ztpehk7z4lhli"
+export const PERIOD_1_GOVERNOR_DATA =
+  "https://api.voting.algorand.foundation/ipfs/bafkreieh77pgmvfexyxbnbexwu4n5x54kgdfop7lzfo26peyrjcwhn6uii"
 export const PERIOD_1_PROPOSALS = [
   "06",
   "08",
@@ -30,15 +34,36 @@ export const PERIOD_1_PROPOSALS = [
   "49",
   "01",
 ]
-export const PERIOD_1_METADATA =
-  "https://api.voting.algorand.foundation/ipfs/bafkreigjiien52ukmfqd5yrjgonrj6ixpr2rm32szps45ztpehk7z4lhli"
-export const PERIOD_1_GOVERNOR_DATA =
-  "https://api.voting.algorand.foundation/ipfs/bafkreieh77pgmvfexyxbnbexwu4n5x54kgdfop7lzfo26peyrjcwhn6uii"
 
 // xGov Period 2
 export const PERIOD_2_APP_ID = 1236654302
-export const PERIOD_2_TOTAL_VOTING_WEIGHT = 2139007219936
+export const PERIOD_2_TOTAL_VOTING_WEIGHT = 3282211058290
 export const PERIOD_2_METADATA =
   "https://api.voting.algorand.foundation/ipfs/bafkreietvjzxff4lnrxo5pzuo4uvtd3cfc6qj5fyyrjpau2scblwwg63su"
 export const PERIOD_2_GOVERNOR_DATA =
   "https://api.voting.algorand.foundation/ipfs/bafkreicsvkwge2xe64wjxutkcioo3uny7oazobxoml67bcswytesyecexa"
+export const PERIOD_2_PROPOSALS = [
+  "01",
+  "50",
+  "53",
+  "55",
+  "61",
+  "70",
+  "71",
+  "72",
+  "74",
+  "77",
+  "78",
+  "79",
+  "80",
+  "81",
+  "82",
+  "83",
+  "84",
+  "85",
+  "86",
+  "87",
+  "89",
+  "90",
+  "93",
+]

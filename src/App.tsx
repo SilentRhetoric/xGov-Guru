@@ -1,7 +1,7 @@
 import { Accordion, Button } from "@kobalte/core"
 import { For, Show, Suspense } from "solid-js"
 import algonode from "./assets/algonode.png"
-import { dateOptions, numberWithCommas } from "./lib/utils"
+import { dateOptions, formatNumWithDecimals, numberWithCommas } from "./lib/utils"
 import useData from "./lib/useData"
 import {
   accountsByProposal,
@@ -12,6 +12,7 @@ import {
   votesVsThrehold,
   weightParticipation,
 } from "./lib/plots"
+import { PERIOD_2_PROPOSALS } from "./lib/constants"
 
 function App() {
   const {
@@ -28,8 +29,8 @@ function App() {
   } = useData
 
   return (
-    <div class="relative mx-auto flex flex-col bg-neutral-100">
-      <header class="sticky top-0 z-50 border-b-[0.5px] border-black bg-neutral-200">
+    <div class="relative mx-auto flex flex-col bg-neutral-200">
+      <header class="sticky top-0 z-50 border-b-[0.5px] border-black bg-neutral-300">
         <div class="mx-auto flex max-w-screen-lg flex-col flex-wrap items-center justify-between px-4 py-2 md:flex-row">
           <div class="flex">
             <h1 class="my-2 flex font-bold">xGov Viewer</h1>
@@ -125,6 +126,15 @@ function App() {
               Session Description: <span class="font-light">{sessionData()?.description}</span>
             </p>
             <p class="font-semibold">
+              Grants Allocation:{" "}
+              <span class="font-light">
+                {numberWithCommas(
+                  formatNumWithDecimals(Number(sessionData()?.communityGrantAllocation), 6)
+                )}{" "}
+                Algo
+              </span>
+            </p>
+            {/* <p class="font-semibold">
               Discussion Forum:{" "}
               <a
                 class="font-light text-blue-600 underline visited:text-purple-600 hover:text-blue-800"
@@ -132,7 +142,7 @@ function App() {
               >
                 {sessionData()?.informationUrl}
               </a>
-            </p>
+            </p> */}
             <p class="font-semibold">
               Session Start:{" "}
               <span class="font-light">
@@ -162,7 +172,6 @@ function App() {
             <div class="rounded-xl border-[0.5px] border-black p-2">Generating graphs... 📊</div>
           }
         >
-          {/* <Button.Root onClick={() => logNFds()}>Log NFDs</Button.Root> */}
           <Show when={csv()}>
             <a
               href={csv().url}

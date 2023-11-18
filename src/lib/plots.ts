@@ -1,29 +1,14 @@
 import { plot, barY, text, dotY, barX, stackX, ruleX, groupX, textX } from "@observablehq/plot"
 import { Question, VotingData } from "./types"
-import { PERIOD_1_PROPOSALS } from "./constants"
+import { PERIOD_2_PROPOSALS } from "./constants"
 import useData from "./useData"
 
-const {
-  votingData,
-  sessionData,
-  questions,
-  setQuestions,
-  expandedItem,
-  setExpandedItem,
-  sort,
-  setSort,
-  proposal,
-  csv,
-  timerDetails,
-  setTimerDetails,
-} = useData
+const { votingData } = useData
 
 export function weightParticipation(votingData: VotingData) {
   if (votingData) {
     const votedWeight = votingData.voters.reduce((sum, v) => (sum += v.voterWeight), 0)
-    // console.debug("votedWeight: ", votedWeight)
     const totalWeight = votingData.governors.snapshot.reduce((sum, g) => (sum += g.weight), 0)
-    // console.debug("totalWeight: ", totalWeight)
     const data = [
       {
         status: "Voted",
@@ -69,7 +54,7 @@ export function votesByEffect(votingData: VotingData) {
       style: { background: "none" },
       marginLeft: 110,
       width: 1000,
-      x: { type: "band", label: "Proposal", domain: PERIOD_1_PROPOSALS },
+      x: { type: "band", label: "Proposal", domain: PERIOD_2_PROPOSALS },
       y: { grid: true },
       marks: [
         barY(votingData?.votes, {
@@ -88,10 +73,13 @@ export function votesByEffect(votingData: VotingData) {
 
 export function votesVsThrehold(votingData: VotingData) {
   if (votingData) {
-    const actualProposals = structuredClone(PERIOD_1_PROPOSALS)
-    actualProposals.pop()
+    const actualProposals = structuredClone(PERIOD_2_PROPOSALS)
+    // Period 1 had mock proposal 01 last but Period 2 has mock proposal first
+    // actualProposals.pop()
+    actualProposals.shift()
     const proposalsToGraph = structuredClone(votingData.results.questionResults)
-    proposalsToGraph.pop()
+    // proposalsToGraph.pop()
+    proposalsToGraph.shift()
     return plot({
       title: "Total Supporting Voting Weight vs Passing Threshold By Proposal",
       subtitle: "Which proposals have passed?  How close are others to passing?",
@@ -138,7 +126,7 @@ export function accountsByProposal(votingData: VotingData) {
       subtitle: "How many different accounts supported each proposal?",
       style: { background: "none" },
       width: 1000,
-      x: { domain: PERIOD_1_PROPOSALS, label: "Proposals" },
+      x: { domain: PERIOD_2_PROPOSALS, label: "Proposals" },
       y: { label: "# of Unique Accounts" },
       marks: [
         barY(votingData?.results.questionResults, {

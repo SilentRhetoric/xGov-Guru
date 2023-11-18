@@ -4,6 +4,12 @@ export function numberWithCommas(num: number | string): string {
   return num_parts.join(".")
 }
 
+export function formatNumWithDecimals(num: number, decimals: number): string {
+  const shifted_num = (num /= Math.pow(10, decimals))
+  const shifted_num_string = shifted_num.toString()
+  return shifted_num_string
+}
+
 export const dateOptions: Intl.DateTimeFormatOptions = {
   weekday: "short",
   year: "numeric",

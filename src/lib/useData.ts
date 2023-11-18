@@ -10,10 +10,11 @@ import {
 } from "./types"
 import { timeBetweenDates } from "./utils"
 import {
-  PERIOD_1_APP_ID,
-  PERIOD_1_METADATA,
-  PERIOD_1_PROPOSALS,
-  PERIOD_1_TOTAL_VOTING_WEIGHT,
+  PERIOD_2_APP_ID,
+  PERIOD_2_GOVERNOR_DATA,
+  PERIOD_2_METADATA,
+  PERIOD_2_PROPOSALS,
+  PERIOD_2_TOTAL_VOTING_WEIGHT,
 } from "./constants"
 import { ABIArrayDynamicType, ABIUintType } from "algosdk"
 import {
@@ -44,7 +45,7 @@ function useData() {
   )
 
   async function fetchSessionData(): Promise<SessionData> {
-    const text = await fetch(PERIOD_1_METADATA).then((response) => response.text())
+    const text = await fetch(PERIOD_2_METADATA).then((response) => response.text())
     const sessionData: SessionData = JSON.parse(text)
     sessionData.questions.forEach((question, i) => {
       question.proposalIndex = i
@@ -54,7 +55,7 @@ function useData() {
       }
       return question
     })
-    const questions = sessionData.questions.reverse()
+    const questions = sessionData.questions
 
     // Expand a proposal based on URL search params
     const currentUrl = new URL(window.location.href)
@@ -78,6 +79,7 @@ function useData() {
     } else {
       setQuestions(questions)
     }
+    // console.debug("sessionData: ", sessionData)
     return sessionData
   }
 
@@ -95,7 +97,7 @@ function useData() {
       if (resp.ok) {
         return `https://raw.githubusercontent.com/algorandfoundation/xGov/main/Proposals/xgov-${pr[0]}.md`
       } else {
-        // Second attempt in case filename case is camel
+        // Second attempt in case filename case is camelCase
         return `https://raw.githubusercontent.com/algorandfoundation/xGov/main/Proposals/xGov-${pr[0]}.md`
       }
     } else return ""
@@ -105,28 +107,28 @@ function useData() {
   async function getVoterInfo(): Promise<VoterInfo[]> {
     const results = await searchTransactions(
       indexerClient,
-      (s) => s.applicationID(PERIOD_1_APP_ID),
-      5000
+      (s) => s.applicationID(PERIOD_2_APP_ID),
+      10000
     )
-    // console.debug(results)
+    // console.debug("results: ", results)
     const voteTxns = results.transactions.filter(
       (t) => t["application-transaction"]["application-args"][0] === "xA/9qg=="
     )
-    // console.debug("Transactions: ", txns)
+    // console.debug("Transactions: ", voteTxns)
     const voteWeightsType = new ABIArrayDynamicType(new ABIUintType(64))
     const allVotersInfo = voteTxns.map((txn) => {
       const address = txn.sender
       // Get the vote arrays from the application arguments
       const args = txn["application-transaction"]["application-args"]
       const votesEncoded = args[args.length - 2] // Second to last arg has the votes
-      // console.debug("Vote weights encoded: ", voteWeights)
+      // console.debug("Vote weights encoded: ", votesEncoded)
       // Decode the vote weights array using ABI decoding
       const voteWeights = voteWeightsType.decode(
         new Uint8Array(Buffer.from(votesEncoded, "base64"))
       ) as bigint[]
       // console.debug("Vote weights: ", voteWeights)
       const voterWeight = Number(voteWeights.reduce((partialSum, w) => partialSum + w, 0n))
-      const relativeWeight = voterWeight / PERIOD_1_TOTAL_VOTING_WEIGHT
+      const relativeWeight = voterWeight / PERIOD_2_TOTAL_VOTING_WEIGHT
       const voteRound = txn["confirmed-round"]
       const voteRoundTime = txn["round-time"]
       const numVotes = Number(
@@ -158,7 +160,7 @@ function useData() {
           return {
             address: voterInfo.address,
             nfd: voterInfo.nfd,
-            proposal: PERIOD_1_PROPOSALS[j],
+            proposal: PERIOD_2_PROPOSALS[j],
             proposalIndex: j,
             votes: Number(vote),
             voterWeight: Number(voterInfo.voterWeight),
@@ -174,10 +176,8 @@ function useData() {
   }
 
   // Get the xGov session data file from the Foundation's IPFS
-  async function getSessionData(): Promise<SessionData> {
-    const text = await fetch(
-      `https://api.voting.algorand.foundation/ipfs/bafkreigjiien52ukmfqd5yrjgonrj6ixpr2rm32szps45ztpehk7z4lhli`
-    ).then((response) => response.text())
+  async function getSessionMetaData(): Promise<SessionData> {
+    const text = await fetch(PERIOD_2_METADATA).then((response) => response.text())
     const sessionData: SessionData = JSON.parse(text)
     sessionData.questions.forEach((question) => {
       const abstract = question.description.split("#")[0] // Use only the content above the next heading
@@ -190,11 +190,9 @@ function useData() {
   }
 
   async function getGovernorsData(): Promise<GovernorsData> {
-    const text = await fetch(
-      `https://api.voting.algorand.foundation/ipfs/bafkreieh77pgmvfexyxbnbexwu4n5x54kgdfop7lzfo26peyrjcwhn6uii`
-    ).then((response) => response.text())
+    const text = await fetch(PERIOD_2_GOVERNOR_DATA).then((response) => response.text())
     const governorsData: GovernorsData = JSON.parse(text)
-    // console.debug(governorsData)
+    // console.debug("governorsData: ", governorsData)
     return governorsData
   }
 
@@ -204,20 +202,20 @@ function useData() {
     sessionData: SessionData,
     voteRecords: VoteRecord[]
   ): SessionResults {
-    // console.debug("Session data: ", sessionData)
-    // console.debug("All vote records: ", voteRecords)
+    // console.debug("sessionDdata: ", sessionData)
+    // console.debug("voteRecords: ", voteRecords)
     if (sessionData && voteRecords) {
       const sessionResultData = sessionData as SessionResults
       sessionResultData.questionResults = sessionResultData.questions
       sessionResultData.questionResults.forEach((q, i) => {
         q.proposalIndex = i
-        q.proposal = PERIOD_1_PROPOSALS[i]
+        q.proposal = PERIOD_2_PROPOSALS[i]
         q.threshold = q.metadata.threshold
         q.passed = "Not Passed"
         q.passedRound = null
         q.passedTime = null
       })
-      sessionResultData.questionResults.forEach((q, i) => (q.proposal = PERIOD_1_PROPOSALS[i]))
+      sessionResultData.questionResults.forEach((q, i) => (q.proposal = PERIOD_2_PROPOSALS[i]))
       sessionResultData.questionResults.forEach((q, i) => (q.threshold = q.metadata.threshold))
       sessionResultData.questionResults.forEach((q, i) => (q.passed = "Not Passed"))
 
@@ -245,8 +243,8 @@ function useData() {
 
   // Loop over all vote records to enrich them with further data, such as if it was effectively wasted
   function enrichVoteRecords(sessionResults: SessionResults, voteRecords: VoteRecord[]) {
-    // console.debug("Session results: ", sessionResults)
-    // console.debug("All vote records: ", allVoteRecords)
+    // console.debug("sessionResults: ", sessionResults)
+    // console.debug("voteRecords: ", voteRecords)
     if (sessionResults && voteRecords) {
       const enrichedVoteRecords = voteRecords.map((v, i) => {
         if (
@@ -270,7 +268,7 @@ function useData() {
           return v
         }
       })
-      // console.debug(enrichedVoteRecords)
+      // console.debug("enrichedVoteRecords: ", enrichedVoteRecords)
       return enrichedVoteRecords
     } else return undefined
   }
@@ -279,23 +277,31 @@ function useData() {
   async function getVotingData(): Promise<VotingData> {
     try {
       const votersInfo = await getVoterInfo()
-      const enrichedVotersInfo = await nfdBatchLookup(votersInfo)
-      const sessiondata = await getSessionData()
+      // console.debug("votersInfo: ", votersInfo)
+
+      // Removing NFD lookup as it slows the initial load significantly
+      // const enrichedVotersInfo = await nfdBatchLookup(votersInfo)
+
+      // console.debug("enrichedVotersInfo: ", enrichedVotersInfo)
+      const sessiondata = await getSessionMetaData()
+      // console.debug("sessiondata: ", sessiondata)
       const governorsData = await getGovernorsData()
-      const voteRecords = createVoteRecords(enrichedVotersInfo)
-      const sessionResults = createSessionResults(sessiondata, voteRecords)
-      const enrichedVoteRecords = enrichVoteRecords(sessionResults, voteRecords)
-      // console.debug("sessionResults: ", sessionResults)
-      // console.debug("voterInfo: ", voterInfo)
-      // console.debug("enrichedVoteRecords: ", enrichedVoteRecords)
       // console.debug("governorsData: ", governorsData)
-      // console.debug("enrichedVoters: ", enrichedVotersInfo)
-      return {
+      const voteRecords = createVoteRecords(votersInfo)
+      // console.debug("voteRecords: ", voteRecords)
+      const sessionResults = createSessionResults(sessiondata, voteRecords)
+      // console.debug("sessionResults: ", sessionResults)
+      const enrichedVoteRecords = enrichVoteRecords(sessionResults, voteRecords)
+      // console.debug("enrichedVoteRecords: ", enrichedVoteRecords)
+
+      const votingData = {
         governors: governorsData,
         results: sessionResults,
-        voters: enrichedVotersInfo,
+        voters: votersInfo,
         votes: enrichedVoteRecords,
       }
+      console.debug("votingData: ", votingData)
+      return votingData
     } catch (e) {
       console.error(e)
     }
@@ -312,16 +318,16 @@ function useData() {
 
       try {
         const resp = await fetch(url)
-        // console.debug(resp)
+        // console.debug("resp: ", resp)
         if (resp.ok) {
           const responseJson = await resp.json()
           // console.debug("responseJson: ", responseJson)
           Object.entries(responseJson).forEach(([addr, data]) => {
             const name = data[0].name
-            // console.debug("NFD Name: ", name)
+            // bug("NFD Name: ", name)
             const index = enrichedVoters.findIndex((v) => v.address === addr)
             enrichedVoters[index].nfd = name
-            // console.debug(enrichedVoters[index])
+            // console.debug("enrichedVoters[index]: ", enrichedVoters[index])
           })
         }
       } catch (e) {
@@ -343,7 +349,7 @@ function useData() {
       csvRows.push(values.join(","))
     }
     const fileContent = csvRows.join("\n")
-    const filename = "xGov_1_votes.csv"
+    const filename = "votes.csv"
     let blob = new Blob([fileContent], { type: "text/csv;charset=utf-8;" })
     let url = URL.createObjectURL(blob)
     return {
