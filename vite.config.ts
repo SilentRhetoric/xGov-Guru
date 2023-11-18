@@ -1,11 +1,14 @@
-import { defineConfig, Plugin } from "vite"
+import { defineConfig } from "vite"
 import solidPlugin from "vite-plugin-solid"
+// import eslint from 'vite-plugin-eslint';
+import eslint from "vite-plugin-eslint"
 // https://github.com/btd/rollup-plugin-visualizer
 import importToCDN from "vite-plugin-cdn-import"
 
 export default defineConfig({
   plugins: [
     solidPlugin(),
+    eslint(),
     importToCDN({
       modules: [
         {

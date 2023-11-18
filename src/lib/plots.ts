@@ -157,7 +157,7 @@ export function votesBar(question: Question) {
   if (votingData()?.votes) {
     const proposalVotes = votingData()
       ?.votes.filter((v) => v.proposalIndex === question.proposalIndex)
-      .reduce((acc, v, i) => {
+      .reduce((acc, v) => {
         v.percentOfThreshold = v.votes / question.metadata.threshold
         acc.push(v)
         return acc

@@ -29,12 +29,11 @@ globalThis.Buffer = Buffer
 const indexerClient = getAlgoIndexerClient(getAlgoNodeConfig("mainnet", "indexer"))
 
 function useData() {
-  const [votingData, { mutate, refetch }] = createResource(getVotingData)
+  const [votingData] = createResource(getVotingData)
   const [sessionData] = createResource(fetchSessionData)
   const [questions, setQuestions] = createSignal<QuestionResult[]>([])
   const [expandedItem, setExpandedItem] = createSignal([""])
   const [sort, setSort] = createSignal("")
-  const [proposal] = createResource(expandedItem, getProposal)
   const csv = createMemo(() => {
     if (votingData()?.votes.length) {
       return createVotesCSV(votingData()?.votes)
@@ -154,7 +153,7 @@ function useData() {
 
   // Map over all voter info and break out the votes array into individual vote records by proposal
   function createVoteRecords(allVotersInfo: VoterInfo[]): VoteRecord[] {
-    const allVoteRecords = allVotersInfo.flatMap((voterInfo, i) => {
+    const allVoteRecords = allVotersInfo.flatMap((voterInfo) => {
       const voteRecords = voterInfo.voteWeights
         .map((vote, j) => {
           return {
@@ -216,8 +215,8 @@ function useData() {
         q.passedTime = null
       })
       sessionResultData.questionResults.forEach((q, i) => (q.proposal = PERIOD_2_PROPOSALS[i]))
-      sessionResultData.questionResults.forEach((q, i) => (q.threshold = q.metadata.threshold))
-      sessionResultData.questionResults.forEach((q, i) => (q.passed = "Not Passed"))
+      sessionResultData.questionResults.forEach((q) => (q.threshold = q.metadata.threshold))
+      sessionResultData.questionResults.forEach((q) => (q.passed = "Not Passed"))
 
       voteRecords.forEach((v) => {
         sessionResultData.questionResults[v.proposalIndex].totalVotes =
@@ -246,7 +245,7 @@ function useData() {
     // console.debug("sessionResults: ", sessionResults)
     // console.debug("voteRecords: ", voteRecords)
     if (sessionResults && voteRecords) {
-      const enrichedVoteRecords = voteRecords.map((v, i) => {
+      const enrichedVoteRecords = voteRecords.map((v) => {
         if (
           sessionResults.questionResults[v.proposalIndex].passedRound === null &&
           v.proposal !== "01"
@@ -305,36 +304,6 @@ function useData() {
     } catch (e) {
       console.error(e)
     }
-  }
-
-  async function nfdBatchLookup(voters: VoterInfo[]) {
-    const enrichedVoters = structuredClone(voters)
-    const batchSize = 20
-    for (let i = 0; i < voters.length; i += batchSize) {
-      const batch = voters.slice(i, i + batchSize)
-      const addrParams = batch.map((v) => `address=${v.address}&`).join("")
-      // console.debug("addrParams: ", addrParams)
-      const url = `https://api.nf.domains/nfd/v2/address?${addrParams}limit=1&view=tiny`
-
-      try {
-        const resp = await fetch(url)
-        // console.debug("resp: ", resp)
-        if (resp.ok) {
-          const responseJson = await resp.json()
-          // console.debug("responseJson: ", responseJson)
-          Object.entries(responseJson).forEach(([addr, data]) => {
-            const name = data[0].name
-            // bug("NFD Name: ", name)
-            const index = enrichedVoters.findIndex((v) => v.address === addr)
-            enrichedVoters[index].nfd = name
-            // console.debug("enrichedVoters[index]: ", enrichedVoters[index])
-          })
-        }
-      } catch (e) {
-        console.error("NFD address reverse lookup error: ", e)
-      }
-    }
-    return enrichedVoters
   }
 
   function createVotesCSV(votes: VoteRecord[]) {
@@ -399,16 +368,46 @@ function useData() {
     setSort("name")
   }
 
+  // async function nfdBatchLookup(voters: VoterInfo[]) {
+  //   const enrichedVoters = structuredClone(voters)
+  //   const batchSize = 20
+  //   for (let i = 0; i < voters.length; i += batchSize) {
+  //     const batch = voters.slice(i, i + batchSize)
+  //     const addrParams = batch.map((v) => `address=${v.address}&`).join("")
+  //     // console.debug("addrParams: ", addrParams)
+  //     const url = `https://api.nf.domains/nfd/v2/address?${addrParams}limit=1&view=tiny`
+
+  //     try {
+  //       const resp = await fetch(url)
+  //       // console.debug("resp: ", resp)
+  //       if (resp.ok) {
+  //         const responseJson = await resp.json()
+  //         // console.debug("responseJson: ", responseJson)
+  //         Object.entries(responseJson).forEach(([addr, data]) => {
+  //           const name = data[0].name
+  //           // bug("NFD Name: ", name)
+  //           const index = enrichedVoters.findIndex((v) => v.address === addr)
+  //           enrichedVoters[index].nfd = name
+  //           // console.debug("enrichedVoters[index]: ", enrichedVoters[index])
+  //         })
+  //       }
+  //     } catch (e) {
+  //       console.error("NFD address reverse lookup error: ", e)
+  //     }
+  //   }
+  //   return enrichedVoters
+  // }
+
   return {
     votingData,
     sessionData,
     questions,
     setQuestions,
+    getProposal,
     expandedItem,
     setExpandedItem,
     sort,
     setSort,
-    proposal,
     csv,
     timerDetails,
     setTimerDetails,
