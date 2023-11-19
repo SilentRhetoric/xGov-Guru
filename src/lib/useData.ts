@@ -1,5 +1,6 @@
 import { createMemo, createResource, createRoot, createSignal, onCleanup } from "solid-js"
 import {
+  Governor,
   GovernorsData,
   QuestionResult,
   SessionData,
@@ -34,9 +35,14 @@ function useData() {
   const [questions, setQuestions] = createSignal<QuestionResult[]>([])
   const [expandedItem, setExpandedItem] = createSignal([""])
   const [sort, setSort] = createSignal("")
-  const csv = createMemo(() => {
+  const votesCsv = createMemo(() => {
     if (votingData()?.votes.length) {
       return createVotesCSV(votingData()?.votes)
+    } else return null
+  })
+  const governorsCsv = createMemo(() => {
+    if (votingData()?.governors.snapshot.length) {
+      return createGovernorsCSV(votingData()?.governors.snapshot)
     } else return null
   })
   const [timerDetails, setTimerDetails] = createSignal(
@@ -327,6 +333,27 @@ function useData() {
     }
   }
 
+  function createGovernorsCSV(governors: Governor[]) {
+    const csvRows: string[] = []
+    const fields = Object.keys(governors[0])
+    csvRows.push(fields.join(","))
+    for (const gov of governors) {
+      const values = fields.map((field) => {
+        const val = gov[field]
+        return `${val}`
+      })
+      csvRows.push(values.join(","))
+    }
+    const fileContent = csvRows.join("\n")
+    const filename = "governors.csv"
+    let blob = new Blob([fileContent], { type: "text/csv;charset=utf-8;" })
+    let url = URL.createObjectURL(blob)
+    return {
+      filename,
+      url,
+    }
+  }
+
   const timer = setInterval(() => {
     setTimerDetails(timeBetweenDates(new Date(sessionData()?.end).valueOf()).timeData)
   }, 1000)
@@ -408,7 +435,8 @@ function useData() {
     setExpandedItem,
     sort,
     setSort,
-    csv,
+    votesCsv,
+    governorsCsv,
     timerDetails,
     setTimerDetails,
     sortAmount,
