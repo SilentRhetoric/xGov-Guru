@@ -16,14 +16,14 @@ export function weightParticipation(votingData: VotingData) {
         fraction: votedWeight / totalWeight,
       },
       {
-        status: "Did Not Vote",
+        status: "Not Voted",
         total: totalWeight - votedWeight,
         fraction: (totalWeight - votedWeight) / totalWeight,
       },
     ]
     return plot({
       title: "Voting Participation By Weight",
-      subtitle: "How much voting weight voted or did not vote?",
+      subtitle: "How much voting weight voted or not?",
       width: 1000,
       style: { background: "none" },
       x: { percent: true, label: "Voting Weight Participation (%)" },
@@ -87,18 +87,19 @@ export function votesVsThrehold(votingData: VotingData) {
       style: { background: "none" },
       marginLeft: 110,
       width: 1000,
-      x: { type: "band", label: "Proposal", domain: actualProposals },
+      x: { type: "band", label: "Proposal #", domain: actualProposals },
       y: { grid: true },
       marks: [
         barY(proposalsToGraph, {
           x: "proposal",
           y: "totalVotes",
           fill: "passed",
+          title: "totalVotes",
         }),
         dotY(proposalsToGraph, {
           x: "proposal",
           y: "threshold",
-          // tip: "xy",
+          // tip: "y",
           // title: (d) => `${Math.round((d.totalVotes / d.threshold) * 100)}%`,
           symbol: "square",
           fill: (d) => (d.totalVotes > d.threshold ? "currentColor" : "none"),
@@ -126,13 +127,20 @@ export function accountsByProposal(votingData: VotingData) {
       subtitle: "How many different accounts supported each proposal?",
       style: { background: "none" },
       width: 1000,
-      x: { domain: PERIOD_2_PROPOSALS, label: "Proposals" },
+      x: { domain: PERIOD_2_PROPOSALS, label: "Proposal #" },
       y: { label: "# of Unique Accounts" },
       marks: [
         barY(votingData?.results.questionResults, {
           x: "proposal",
           y: "numVoters",
           fill: "turquoise",
+          title: "numVoters",
+        }),
+        text(votingData?.results.questionResults, {
+          text: "numVoters",
+          x: "proposal",
+          y: "numVoters",
+          dy: -6,
         }),
       ],
     })
@@ -184,7 +192,7 @@ export function voterParticipation(votingData: VotingData) {
         fraction: votingData.voters.length / votingData.governors.snapshot.length,
       },
       {
-        status: "Did Not Vote",
+        status: "Not Voted",
         total: votingData.governors.snapshot.length - votingData.voters.length,
         fraction:
           (votingData.governors.snapshot.length - votingData.voters.length) /
@@ -193,7 +201,7 @@ export function voterParticipation(votingData: VotingData) {
     ]
     return plot({
       title: "Voting Participation By Account",
-      subtitle: "How many unique accounts voted or did not vote?",
+      subtitle: "How many unique accounts voted or not?",
       width: 1000,
       style: { background: "none" },
       x: { percent: true, label: "Account Participation (%)" },
