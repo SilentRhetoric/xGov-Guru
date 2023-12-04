@@ -284,7 +284,7 @@ function App() {
           </For>
         </Accordion.Root>
       </div>
-      <footer class="flex flex-col justify-center gap-2 px-4 py-8 font-light">
+      <footer class="flex flex-col justify-center gap-2 p-4 font-light">
         <a
           href="https://x.com/silentrhetoric"
           target="_blank"
@@ -298,7 +298,7 @@ function App() {
               <path d="M14.258 10.152L23.176 0h-2.113l-7.747 8.813L7.133 0H0l9.352 13.328L0 23.973h2.113l8.176-9.309 6.531 9.309h7.133zm-2.895 3.293l-.949-1.328L2.875 1.56h3.246l6.086 8.523.945 1.328 7.91 11.078h-3.246zm0 0" />
             </g>
           </svg>
-          <p class="ml-2">Made with &#9829; by SilentRhetoric</p>{" "}
+          <p class="ml-2">Made with &#9829; by SilentRhetoric</p>
         </a>
         <a
           href="https://github.com/SilentRhetoric/xGov-viewer"
