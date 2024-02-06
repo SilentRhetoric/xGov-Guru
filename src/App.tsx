@@ -35,7 +35,7 @@ function App() {
       <header class="sticky top-0 z-50 border-b-[0.5px] border-black bg-neutral-300">
         <div class="mx-auto flex max-w-screen-lg flex-col flex-wrap items-center justify-between px-4 py-2 md:flex-row">
           <div class="flex">
-            <h1 class="my-2 flex font-bold">xGov Viewer</h1>
+            <h1 class="my-2 flex font-bold">xGov Guru</h1>
           </div>
           <div class="flex items-center gap-2">
             <Button.Root

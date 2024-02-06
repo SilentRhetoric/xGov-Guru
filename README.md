@@ -1,4 +1,4 @@
-# Algorand xGov Proposal Viewer
+# xGov Guru
 
 This is a web app tool to make it easier to browse Algorand xGov proposals. It runs entirely in the browser and retrieves xGov session information from the Algorand Foundation IPFS pin and the full text of the proposals from GitHub by their pull request number on the [xGov](https://github.com/algorandfoundation/xGov) repository.
 

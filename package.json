@@ -1,7 +1,7 @@
 {
-  "name": "xgov-viewer",
+  "name": "xgov-guru",
   "version": "0.0.1",
-  "description": "Viewer for Algorand xGov Program",
+  "description": "Be an Algorand xGov guru",
   "scripts": {
     "start": "vite",
     "dev": "vite",
