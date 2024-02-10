@@ -30,10 +30,14 @@ function App() {
 
   const [proposal] = createResource(expandedItem, getProposal)
 
+  // createComputed(() => {
+  //   console.debug("expandedItem", expandedItem())
+  // })
+
   return (
     <div class="relative mx-auto flex min-h-screen flex-col bg-neutral-200">
       <header class="sticky top-0 z-50 border-b-[0.5px] border-black bg-neutral-300">
-        <div class="mx-auto flex max-w-screen-lg flex-col flex-wrap items-center justify-between px-4 py-2 md:flex-row">
+        <div class="mx-auto flex flex-col flex-wrap items-center justify-between px-4 py-2 md:flex-row">
           <div class="flex">
             <h1 class="my-2 flex font-bold">xGov Guru</h1>
           </div>
@@ -117,7 +121,7 @@ function App() {
           </div>
         </div>
       </header>
-      <div class="mx-auto flex w-full max-w-screen-lg flex-col gap-2 p-2">
+      <div class="mx-auto flex flex-col gap-2 p-2">
         <div class="rounded-xl border-[0.5px] border-black p-2">
           <Suspense fallback={<span>Loading session details...</span>}>
             <h2 class="font-semibold">Active Algorand xGov Session Details</h2>
@@ -174,56 +178,59 @@ function App() {
             <div class="rounded-xl border-[0.5px] border-black p-2">Generating graphs... 📊</div>
           }
         >
-          <Show when={votesCsv()}>
-            <a
-              href={votesCsv().url}
-              download={votesCsv().filename}
-              class="flex"
-            >
-              <Button.Root class="flex h-12 w-full gap-2 rounded-xl border-[0.5px] border-black px-3 py-2 text-xl hover:bg-neutral-300 active:bg-neutral-400">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke-width="1.5"
-                  stroke="currentColor"
-                  class="h-6 w-6"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M9 8.25H7.5a2.25 2.25 0 00-2.25 2.25v9a2.25 2.25 0 002.25 2.25h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25H15M9 12l3 3m0 0l3-3m-3 3V2.25"
-                  />
-                </svg>
-                <p class="font-light">Download votes data as .csv file</p>
-              </Button.Root>
-            </a>
-          </Show>
-          <Show when={governorsCsv()}>
-            <a
-              href={governorsCsv().url}
-              download={governorsCsv().filename}
-              class="flex"
-            >
-              <Button.Root class="flex h-12 w-full gap-2 rounded-xl border-[0.5px] border-black px-3 py-2 text-xl hover:bg-neutral-300 active:bg-neutral-400">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke-width="1.5"
-                  stroke="currentColor"
-                  class="h-6 w-6"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M9 8.25H7.5a2.25 2.25 0 00-2.25 2.25v9a2.25 2.25 0 002.25 2.25h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25H15M9 12l3 3m0 0l3-3m-3 3V2.25"
-                  />
-                </svg>
-                <p class="font-light">Download governors snapshot as .csv file</p>
-              </Button.Root>
-            </a>
-          </Show>
+          <div class="flex flex-col gap-2 sm:flex-row">
+            <Show when={votesCsv()}>
+              <a
+                href={votesCsv().url}
+                download={votesCsv().filename}
+                class="flex grow"
+              >
+                <Button.Root class="flex h-12 w-full gap-2 rounded-xl border-[0.5px] border-black px-3 py-2 text-xl hover:bg-neutral-300 active:bg-neutral-400">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke-width="1.5"
+                    stroke="currentColor"
+                    class="h-6 w-6"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M9 8.25H7.5a2.25 2.25 0 00-2.25 2.25v9a2.25 2.25 0 002.25 2.25h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25H15M9 12l3 3m0 0l3-3m-3 3V2.25"
+                    />
+                  </svg>
+                  <p class="font-light">Voting data .csv</p>
+                </Button.Root>
+              </a>
+            </Show>
+            <Show when={governorsCsv()}>
+              <a
+                href={governorsCsv().url}
+                download={governorsCsv().filename}
+                class="flex grow"
+              >
+                <Button.Root class="flex h-12 w-full gap-2 rounded-xl border-[0.5px] border-black px-3 py-2 text-xl hover:bg-neutral-300 active:bg-neutral-400">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke-width="1.5"
+                    stroke="currentColor"
+                    class="h-6 w-6"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M9 8.25H7.5a2.25 2.25 0 00-2.25 2.25v9a2.25 2.25 0 002.25 2.25h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25H15M9 12l3 3m0 0l3-3m-3 3V2.25"
+                    />
+                  </svg>
+                  <p class="font-light">xGovs snapshot .csv</p>
+                </Button.Root>
+              </a>
+            </Show>
+          </div>
+
           <div class="rounded-xl border-[0.5px] border-black p-2">
             {voterParticipation(votingData())}
           </div>
@@ -252,11 +259,15 @@ function App() {
           <For each={questions()}>
             {(question) => (
               <Accordion.Item
-                value={`${parseInt(question.prompt.substring(1, 3))}`}
+                value={`${parseInt(question.prompt.substring(1, 4))}`}
                 class="rounded-xl border-[0.5px] border-black bg-neutral-200 hover:bg-neutral-300 active:bg-neutral-400"
               >
                 <Accordion.Trigger class="w-full p-2 text-left font-light">
                   <p class="font-semibold">{question.prompt}</p>
+                  <div class="flex flex-row text-sm leading-tight">
+                    <p class="w-24">Request: </p>
+                    <p>{numberWithCommas(question.metadata.ask)} Algos</p>
+                  </div>
                   <div class="flex flex-row text-sm leading-tight">
                     <p class="w-24">Category: </p>
                     <p>{question.metadata.category}</p>
@@ -264,10 +275,6 @@ function App() {
                   <div class="flex flex-row text-sm leading-tight">
                     <p class="w-24">Focus Area: </p>
                     <p>{question.metadata.focus_area}</p>
-                  </div>
-                  <div class="flex flex-row text-sm leading-tight">
-                    <p class="w-24">Request: </p>
-                    <p>{numberWithCommas(question.metadata.ask)} Algos</p>
                   </div>
                   <Accordion.Content class="py-2">
                     <div>{votesBar(question)}</div>
