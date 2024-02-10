@@ -1,6 +1,14 @@
 # xGov Guru
 
-This is a web app tool to make it easier to browse Algorand xGov proposals. It runs entirely in the browser and retrieves xGov session information from the Algorand Foundation IPFS pin and the full text of the proposals from GitHub by their pull request number on the [xGov](https://github.com/algorandfoundation/xGov) repository.
+![image](https://i.ibb.co/hHj68Mx/xgov-guru-1200x630.png)
+
+xGov Guru is a web app to explore Algorand xGov voting data and make it easier to read the full proposals. In the spirit of Web3, the app runs entirely in the browser and does not depend on any back-end server other than an Algorand Indexer.
+
+Voting data is collected by searching an indexer for transactions to the smart contract. It is then processed and enriched to produce summary graphs with unique insights into the voting activity.
+
+It retrieves xGov session information from the Algorand Foundation IPFS pin and the full text of the proposals from GitHub by their pull request number on the [xGov](https://github.com/algorandfoundation/xGov) repository.
+
+xGov Guru is free open source software under the MIT license. As this is a tool for the community, pull requests are welcome.
 
 ## Usage
 

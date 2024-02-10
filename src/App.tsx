@@ -123,7 +123,7 @@ function App() {
         </div>
       </header>
       <div class="mx-auto flex flex-col gap-8 p-2">
-        <Suspense fallback={<div class="p-2">Loading session details...</div>}>
+        <Suspense fallback={<p class="p-2">Loading session details...</p>}>
           <div>
             <h2 class="font-semibold">Active Algorand xGov Session Details</h2>
             <p class="font-semibold">
@@ -174,7 +174,7 @@ function App() {
             </p>
           </div>
         </Suspense>
-        <Suspense fallback={<div class="p-2">Generating graphs... 📊📊📊📊📊📊</div>}>
+        <Suspense fallback={<p class="p-2">Generating graphs... 📊📊📊📊📊📊</p>}>
           <div class="mx-auto flex flex-col gap-4">
             <div class="flex flex-col gap-2 sm:flex-row">
               <Show when={votesCsv()}>
@@ -263,7 +263,7 @@ function App() {
                     <p class="w-24">Focus Area: </p>
                     <p>{question.metadata.focus_area}</p>
                   </div>
-                  <Accordion.Content class="max-w-[calc(100vw-16px)] xl:max-w-xl">
+                  <Accordion.Content class="max-w-[calc(100vw-16px)]">
                     <div>{votesBar(question)}</div>
                     <Suspense
                       fallback={<p class="font-light">{"Loading proposal from GitHub..."}</p>}
