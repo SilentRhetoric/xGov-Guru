@@ -12,6 +12,7 @@ import {
   votesVsThrehold,
   weightParticipation,
 } from "./lib/plots"
+import { SESSION_INFO } from "./lib/constants"
 
 function App() {
   const {
@@ -36,14 +37,14 @@ function App() {
 
   return (
     <div class="relative mx-auto flex min-h-screen flex-col bg-neutral-200">
-      <header class="sticky top-0 z-50 border-b-[0.5px] border-black bg-neutral-300">
+      <header class="sticky top-0 z-50 border-b border-black bg-neutral-200">
         <div class="mx-auto flex flex-col flex-wrap items-center justify-between px-4 py-2 md:flex-row">
           <div class="flex">
             <h1 class="my-2 flex font-bold">xGov Guru</h1>
           </div>
           <div class="flex items-center gap-2">
             <Button.Root
-              class="flex h-12 w-12 items-center justify-center rounded-xl border-[0.5px] border-black px-3 py-2 text-xl font-semibold hover:bg-neutral-300 active:bg-neutral-400"
+              class="flex h-10 w-10 items-center justify-center rounded-xl border-[0.5px] border-black px-3 py-2 text-xl font-semibold hover:bg-neutral-300 active:bg-neutral-400"
               onClick={sortName}
               aria-label="Sort by number"
             >
@@ -64,7 +65,7 @@ function App() {
               />
             </svg>
             <Button.Root
-              class="flex h-12 w-12 items-center justify-center rounded-xl border-[0.5px] border-black px-2 py-2 hover:bg-neutral-300 active:bg-neutral-400"
+              class="flex h-10 w-10 items-center justify-center rounded-xl border-[0.5px] border-black px-2 py-2 hover:bg-neutral-300 active:bg-neutral-400"
               onClick={sortAmount}
               aria-label="Sort by amount"
             >
@@ -97,8 +98,8 @@ function App() {
               </svg>
             </Button.Root>
             <a
-              class="flex h-12 w-24 items-center justify-center rounded-xl border-[0.5px] border-black px-2 py-2 text-xl font-light hover:bg-neutral-300 active:bg-neutral-400"
-              href="https://xgov.algorand.foundation/vote/1236654302"
+              class="flex h-10 w-24 items-center justify-center rounded-xl border-[0.5px] border-black px-2 py-2 text-xl font-light hover:bg-neutral-300 active:bg-neutral-400"
+              href={`https://xgov.algorand.foundation/vote/${SESSION_INFO[3].appId}`}
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -291,7 +292,7 @@ function App() {
           </For>
         </Accordion.Root>
       </div>
-      <footer class="flex flex-col justify-center gap-2 p-4 font-light">
+      <footer class="mt-16 flex flex-col justify-center gap-2 p-4 font-light">
         <a
           href="https://x.com/silentrhetoric"
           target="_blank"
