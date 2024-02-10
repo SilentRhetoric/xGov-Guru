@@ -10,13 +10,7 @@ import {
   VotingData,
 } from "./types"
 import { timeBetweenDates } from "./utils"
-import {
-  PERIOD_2_APP_ID,
-  PERIOD_2_GOVERNOR_DATA,
-  PERIOD_2_METADATA,
-  PERIOD_2_PROPOSALS,
-  PERIOD_2_TOTAL_VOTING_WEIGHT,
-} from "./constants"
+import { SESSION_INFO } from "./constants"
 import { ABIArrayDynamicType, ABIUintType } from "algosdk"
 import {
   getAlgoIndexerClient,
@@ -50,7 +44,7 @@ function useData() {
   )
 
   async function fetchSessionData(): Promise<SessionData> {
-    const text = await fetch(PERIOD_2_METADATA).then((response) => response.text())
+    const text = await fetch(SESSION_INFO[3].metadataUrl).then((response) => response.text())
     const sessionData: SessionData = JSON.parse(text)
     sessionData.questions.forEach((question, i) => {
       question.proposalIndex = i
@@ -68,7 +62,7 @@ function useData() {
     const expandId = params.get("id")
     if (expandId) {
       const proposalToExpand = questions.find(
-        (question) => `${parseInt(question.prompt.substring(1, 3))}` === expandId
+        (question) => `${parseInt(question.prompt.substring(1, 4))}` === expandId
       )
       if (proposalToExpand) {
         const indexOfProposal = questions.indexOf(proposalToExpand)
@@ -91,8 +85,9 @@ function useData() {
   async function getProposal(expandedItem: string[]): Promise<string> {
     // const question = questions()[Number(expandedItem[0])]
     const question = questions().find(
-      (question) => `${parseInt(question.prompt.substring(1, 3))}` === expandedItem[0]
+      (question) => `${parseInt(question.prompt.substring(1, 4))}` === expandedItem[0]
     )
+    // console.debug("question: ", question)
     const regex = /(?<=pull\/)\d+(?=\/files)/
     const pr = question && question.metadata.link.match(regex)
     if (pr && pr[0]) {
@@ -112,7 +107,7 @@ function useData() {
   async function getVoterInfo(): Promise<VoterInfo[]> {
     const results = await searchTransactions(
       indexerClient,
-      (s) => s.applicationID(PERIOD_2_APP_ID),
+      (s) => s.applicationID(SESSION_INFO[3].appId),
       10000
     )
     // console.debug("results: ", results)
@@ -133,7 +128,7 @@ function useData() {
       ) as bigint[]
       // console.debug("Vote weights: ", voteWeights)
       const voterWeight = Number(voteWeights.reduce((partialSum, w) => partialSum + w, 0n))
-      const relativeWeight = voterWeight / PERIOD_2_TOTAL_VOTING_WEIGHT
+      const relativeWeight = voterWeight / SESSION_INFO[3].totalVotingWeight
       const voteRound = txn["confirmed-round"]
       const voteRoundTime = txn["round-time"]
       const numVotes = Number(
@@ -165,7 +160,7 @@ function useData() {
           return {
             address: voterInfo.address,
             nfd: voterInfo.nfd,
-            proposal: PERIOD_2_PROPOSALS[j],
+            proposal: SESSION_INFO[3].proposalNums[j],
             proposalIndex: j,
             votes: Number(vote),
             voterWeight: Number(voterInfo.voterWeight),
@@ -182,7 +177,7 @@ function useData() {
 
   // Get the xGov session data file from the Foundation's IPFS
   async function getSessionMetaData(): Promise<SessionData> {
-    const text = await fetch(PERIOD_2_METADATA).then((response) => response.text())
+    const text = await fetch(SESSION_INFO[3].metadataUrl).then((response) => response.text())
     const sessionData: SessionData = JSON.parse(text)
     sessionData.questions.forEach((question) => {
       const abstract = question.description.split("#")[0] // Use only the content above the next heading
@@ -195,7 +190,7 @@ function useData() {
   }
 
   async function getGovernorsData(): Promise<GovernorsData> {
-    const text = await fetch(PERIOD_2_GOVERNOR_DATA).then((response) => response.text())
+    const text = await fetch(SESSION_INFO[3].governorDataUrl).then((response) => response.text())
     const governorsData: GovernorsData = JSON.parse(text)
     // console.debug("governorsData: ", governorsData)
     return governorsData
@@ -214,13 +209,15 @@ function useData() {
       sessionResultData.questionResults = sessionResultData.questions
       sessionResultData.questionResults.forEach((q, i) => {
         q.proposalIndex = i
-        q.proposal = PERIOD_2_PROPOSALS[i]
+        q.proposal = SESSION_INFO[3].proposalNums[i]
         q.threshold = q.metadata.threshold
         q.passed = "Not Passed"
         q.passedRound = null
         q.passedTime = null
       })
-      sessionResultData.questionResults.forEach((q, i) => (q.proposal = PERIOD_2_PROPOSALS[i]))
+      sessionResultData.questionResults.forEach(
+        (q, i) => (q.proposal = SESSION_INFO[3].proposalNums[i])
+      )
       sessionResultData.questionResults.forEach((q) => (q.threshold = q.metadata.threshold))
       sessionResultData.questionResults.forEach((q) => (q.passed = "Not Passed"))
 
@@ -383,9 +380,9 @@ function useData() {
       const sorted = questions()
         .slice()
         .sort((a, b) => {
-          return parseInt(a.prompt.substring(1, 3)) > parseInt(b.prompt.substring(1, 3))
+          return parseInt(a.prompt.substring(1, 4)) > parseInt(b.prompt.substring(1, 4))
             ? 1
-            : parseInt(b.prompt.substring(1, 3)) > parseInt(a.prompt.substring(1, 3))
+            : parseInt(b.prompt.substring(1, 4)) > parseInt(a.prompt.substring(1, 4))
             ? -1
             : 0
         })

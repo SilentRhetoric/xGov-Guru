@@ -1,6 +1,6 @@
 import { plot, barY, text, dotY, barX, stackX, ruleX, groupX, textX } from "@observablehq/plot"
 import { Question, VotingData } from "./types"
-import { PERIOD_2_PROPOSALS } from "./constants"
+import { SESSION_INFO } from "./constants"
 import useData from "./useData"
 
 const { votingData } = useData
@@ -24,7 +24,7 @@ export function weightParticipation(votingData: VotingData) {
     return plot({
       title: "Voting Participation By Weight",
       subtitle: "How much voting weight voted or not?",
-      width: 1000,
+      width: 1280,
       style: { background: "none" },
       x: { percent: true, label: "Voting Weight Participation (%)" },
       marks: [
@@ -53,8 +53,8 @@ export function votesByEffect(votingData: VotingData) {
       color: { legend: true, scheme: "YlGnBu", reverse: true },
       style: { background: "none" },
       marginLeft: 110,
-      width: 1000,
-      x: { type: "band", label: "Proposal", domain: PERIOD_2_PROPOSALS },
+      width: 1280,
+      x: { type: "band", label: "Proposal", domain: SESSION_INFO[3].proposalNums },
       y: { grid: true },
       marks: [
         barY(votingData?.votes, {
@@ -73,20 +73,28 @@ export function votesByEffect(votingData: VotingData) {
 
 export function votesVsThrehold(votingData: VotingData) {
   if (votingData) {
-    const actualProposals = structuredClone(PERIOD_2_PROPOSALS)
-    // Period 1 had mock proposal 01 last but Period 2 has mock proposal first
+    // Period 3 has mock proposal last again, so filter it
+    const actualProposals = structuredClone(SESSION_INFO[3].proposalNums).filter((p) => p !== "01")
+    // Period 1 had mock proposal 01 last so pop it
     // actualProposals.pop()
-    actualProposals.shift()
-    const proposalsToGraph = structuredClone(votingData.results.questionResults)
+    // Period 2 has mock proposal first so shift it
+    // actualProposals.shift()
+
+    // Period 3 has mock proposal last again, so filter it
+    const proposalsToGraph = structuredClone(votingData.results.questionResults).filter(
+      (q) => q.proposal !== "01"
+    )
+    // Period 1 had mock proposal 01 last so pop it
     // proposalsToGraph.pop()
-    proposalsToGraph.shift()
+    // Period 2 has mock proposal first so shift it
+    // proposalsToGraph.shift()
     return plot({
       title: "Total Supporting Voting Weight vs Passing Threshold By Proposal",
       subtitle: "Which proposals have passed?  How close are others to passing?",
       color: { legend: true, scheme: "PRGn" },
       style: { background: "none" },
       marginLeft: 110,
-      width: 1000,
+      width: 1280,
       x: { type: "band", label: "Proposal #", domain: actualProposals },
       y: { grid: true },
       marks: [
@@ -109,7 +117,7 @@ export function votesVsThrehold(votingData: VotingData) {
           text: (d) => `${Math.round((d.totalVotes / d.threshold) * 100)}%`,
           x: "proposal",
           y: "totalVotes",
-          dx: 6,
+          dx: 0,
           dy: -5,
           rotate: 270,
           textAnchor: "start",
@@ -126,8 +134,8 @@ export function accountsByProposal(votingData: VotingData) {
       title: "Unique Accounts Supporting Each Proposal",
       subtitle: "How many different accounts supported each proposal?",
       style: { background: "none" },
-      width: 1000,
-      x: { domain: PERIOD_2_PROPOSALS, label: "Proposal #" },
+      width: 1280,
+      x: { domain: SESSION_INFO[3].proposalNums, label: "Proposal #" },
       y: { label: "# of Unique Accounts" },
       marks: [
         barY(votingData?.results.questionResults, {
@@ -153,7 +161,7 @@ export function votesPerVoter(votingData: VotingData) {
       title: "Frequency of Number of Proposals Supported by Account",
       subtitle: "How many different proposals did individual accounts support?",
       style: { background: "none" },
-      width: 1000,
+      width: 1280,
       x: { label: "# Proposals Supported" },
       y: { label: "# of Unique Accounts" },
       marks: [barY(votingData?.voters, groupX({ y: "count" }, { x: "numVotes", fill: "tomato" }))],
@@ -173,7 +181,7 @@ export function votesBar(question: Question) {
       .sort((a, b) => a.votes - b.votes)
     return plot({
       x: { percent: true },
-      width: 1000,
+      width: 1280,
       style: { background: "none" },
       marks: [
         barX(proposalVotes, stackX({ x: "percentOfThreshold", fill: "#636363" })),
@@ -202,7 +210,7 @@ export function voterParticipation(votingData: VotingData) {
     return plot({
       title: "Voting Participation By Account",
       subtitle: "How many unique accounts voted or not?",
-      width: 1000,
+      width: 1280,
       style: { background: "none" },
       x: { percent: true, label: "Account Participation (%)" },
       marks: [
