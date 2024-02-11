@@ -89,8 +89,8 @@ export function votesVsThrehold(votingData: VotingData) {
     // Period 2 has mock proposal first so shift it
     // proposalsToGraph.shift()
     return plot({
-      title: "Total Supporting Voting Weight vs Passing Threshold By Proposal",
-      subtitle: "Which proposals have passed?  How close are others to passing?",
+      title: "Absolute Supporting Voting Weight vs Passing Threshold By Proposal",
+      subtitle: "Which proposals have passed?  How close are others to passing in absolute terms?",
       color: { legend: true, scheme: "PRGn" },
       style: { background: "none" },
       marginLeft: 110,
@@ -117,6 +117,63 @@ export function votesVsThrehold(votingData: VotingData) {
           text: (d) => `${Math.round((d.totalVotes / d.threshold) * 100)}%`,
           x: "proposal",
           y: "totalVotes",
+          dx: 0,
+          dy: -5,
+          rotate: 270,
+          textAnchor: "start",
+          lineAnchor: "top",
+        }),
+      ],
+    })
+  }
+}
+
+export function votesVsThreholdPercentage(votingData: VotingData) {
+  if (votingData) {
+    // Period 3 has mock proposal last again, so filter it
+    const actualProposals = structuredClone(SESSION_INFO[3].proposalNums).filter((p) => p !== "01")
+    // Period 1 had mock proposal 01 last so pop it
+    // actualProposals.pop()
+    // Period 2 has mock proposal first so shift it
+    // actualProposals.shift()
+
+    // Period 3 has mock proposal last again, so filter it
+    const proposalsToGraph = structuredClone(votingData.results.questionResults).filter(
+      (q) => q.proposal !== "01"
+    )
+    // Period 1 had mock proposal 01 last so pop it
+    // proposalsToGraph.pop()
+    // Period 2 has mock proposal first so shift it
+    // proposalsToGraph.shift()
+    return plot({
+      title: "Relative Supporting Voting Progress vs Passing Threshold By Proposal",
+      subtitle: "Which proposals have passed?  How close are others to passing in relative terms?",
+      color: { legend: true, scheme: "PRGn" },
+      style: { background: "none" },
+      marginLeft: 110,
+      width: 1280,
+      x: { type: "band", label: "Proposal #", domain: actualProposals },
+      y: { grid: true },
+      marks: [
+        barY(proposalsToGraph, {
+          x: "proposal",
+          y: (d) => (100 * d.totalVotes) / d.threshold,
+          fill: "passed",
+          title: "percentageVotes",
+        }),
+        // dotY(proposalsToGraph, {
+        //   x: "proposal",
+        //   y: "threshold",
+        //   // tip: "y",
+        //   // title: (d) => `${Math.round((d.totalVotes / d.threshold) * 100)}%`,
+        //   symbol: "square",
+        //   fill: (d) => (d.totalVotes > d.threshold ? "currentColor" : "none"),
+        //   stroke: "black",
+        // }),
+        text(proposalsToGraph, {
+          text: (d) => `${Math.round((d.totalVotes / d.threshold) * 100)}%`,
+          x: "proposal",
+          y: (d) => (100 * d.totalVotes) / d.threshold,
           dx: 0,
           dy: -5,
           rotate: 270,

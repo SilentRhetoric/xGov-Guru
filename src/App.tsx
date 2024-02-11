@@ -10,6 +10,7 @@ import {
   votesByEffect,
   votesPerVoter,
   votesVsThrehold,
+  votesVsThreholdPercentage,
   weightParticipation,
 } from "./lib/plots"
 import { SESSION_INFO } from "./lib/constants"
@@ -232,6 +233,7 @@ function App() {
             <div>{weightParticipation(votingData())}</div>
             <div>{votesByEffect(votingData())}</div>
             <div>{votesVsThrehold(votingData())}</div>
+            <div>{votesVsThreholdPercentage(votingData())}</div>
             <div>{accountsByProposal(votingData())}</div>
             <div>{votesPerVoter(votingData())}</div>
           </div>
