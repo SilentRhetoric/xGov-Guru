@@ -153,7 +153,7 @@ export function votesVsThrehold(votingData: VotingData) {
           x: "proposal",
           y: "totalVotes",
           fill: "passed",
-          title: "totalVotes",
+          title: (d) => `${Math.round((100 * d.totalVotes) / d.threshold)}%`,
         }),
         dotY(proposalsToGraph, {
           x: "proposal",
@@ -165,7 +165,7 @@ export function votesVsThrehold(votingData: VotingData) {
           stroke: "black",
         }),
         text(proposalsToGraph, {
-          text: (d) => `${Math.round((d.totalVotes / d.threshold) * 100)}%`,
+          text: (d) => `${Math.round((100 * d.totalVotes) / d.threshold)}%`,
           x: "proposal",
           y: "totalVotes",
           dx: 0,
