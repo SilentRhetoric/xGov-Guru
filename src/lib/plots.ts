@@ -180,11 +180,11 @@ export function votesVsThrehold(votingData: VotingData) {
 }
 
 export function votesVsThreholdPercentage(votingData: VotingData) {
-  const votedWeight = votingData.voters.reduce((sum, v) => (sum += v.voterWeight), 0)
-  const totalWeight = votingData.governors.snapshot.reduce((sum, g) => (sum += g.weight), 0)
-  const percentWeightVoted = (100 * votedWeight) / totalWeight
-
   if (votingData) {
+    const votedWeight = votingData.voters.reduce((sum, v) => (sum += v.voterWeight), 0)
+    const totalWeight = votingData.governors.snapshot.reduce((sum, g) => (sum += g.weight), 0)
+    const percentWeightVoted = (100 * votedWeight) / totalWeight
+
     // Period 3 has mock proposal last again, so filter it
     const actualProposals = structuredClone(SESSION_INFO[3].proposalNums).filter((p) => p !== "01")
     // Period 1 had mock proposal 01 last so pop it
