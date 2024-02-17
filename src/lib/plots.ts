@@ -1,9 +1,60 @@
-import { plot, barY, text, dotY, barX, stackX, ruleX, groupX, textX } from "@observablehq/plot"
+import {
+  plot,
+  barY,
+  text,
+  dotY,
+  barX,
+  stackX,
+  ruleX,
+  groupX,
+  textX,
+  ruleY,
+} from "@observablehq/plot"
 import { Question, VotingData } from "./types"
 import { SESSION_INFO } from "./constants"
 import useData from "./useData"
 
 const { votingData } = useData
+
+export function voterParticipation(votingData: VotingData) {
+  if (votingData) {
+    const data = [
+      {
+        status: "Voted",
+        total: votingData.voters.length,
+        fraction: votingData.voters.length / votingData.governors.snapshot.length,
+      },
+      {
+        status: "Not Voted",
+        total: votingData.governors.snapshot.length - votingData.voters.length,
+        fraction:
+          (votingData.governors.snapshot.length - votingData.voters.length) /
+          votingData.governors.snapshot.length,
+      },
+    ]
+    return plot({
+      title: "Voting Participation By Account",
+      subtitle: "How many unique accounts voted or not?",
+      width: 1280,
+      style: { background: "none" },
+      x: { percent: true, label: "Account Participation (%)" },
+      marks: [
+        barX(
+          data,
+          stackX({ x: "fraction", fill: (d) => (d.status === "Voted" ? "green" : "red") })
+        ),
+        textX(
+          data,
+          stackX({
+            x: "fraction",
+            text: (d) => `${d.status} (${d.total}, ${(d.fraction * 100).toFixed(2)}%)`,
+            fill: "white",
+          })
+        ),
+      ],
+    })
+  }
+}
 
 export function weightParticipation(votingData: VotingData) {
   if (votingData) {
@@ -129,6 +180,10 @@ export function votesVsThrehold(votingData: VotingData) {
 }
 
 export function votesVsThreholdPercentage(votingData: VotingData) {
+  const votedWeight = votingData.voters.reduce((sum, v) => (sum += v.voterWeight), 0)
+  const totalWeight = votingData.governors.snapshot.reduce((sum, g) => (sum += g.weight), 0)
+  const percentWeightVoted = (100 * votedWeight) / totalWeight
+
   if (votingData) {
     // Period 3 has mock proposal last again, so filter it
     const actualProposals = structuredClone(SESSION_INFO[3].proposalNums).filter((p) => p !== "01")
@@ -180,6 +235,7 @@ export function votesVsThreholdPercentage(votingData: VotingData) {
           textAnchor: "start",
           lineAnchor: "top",
         }),
+        ruleY([percentWeightVoted], { stroke: "red" }),
       ],
     })
   }
@@ -243,46 +299,6 @@ export function votesBar(question: Question) {
       marks: [
         barX(proposalVotes, stackX({ x: "percentOfThreshold", fill: "#636363" })),
         ruleX([0, 1]),
-      ],
-    })
-  }
-}
-
-export function voterParticipation(votingData: VotingData) {
-  if (votingData) {
-    const data = [
-      {
-        status: "Voted",
-        total: votingData.voters.length,
-        fraction: votingData.voters.length / votingData.governors.snapshot.length,
-      },
-      {
-        status: "Not Voted",
-        total: votingData.governors.snapshot.length - votingData.voters.length,
-        fraction:
-          (votingData.governors.snapshot.length - votingData.voters.length) /
-          votingData.governors.snapshot.length,
-      },
-    ]
-    return plot({
-      title: "Voting Participation By Account",
-      subtitle: "How many unique accounts voted or not?",
-      width: 1280,
-      style: { background: "none" },
-      x: { percent: true, label: "Account Participation (%)" },
-      marks: [
-        barX(
-          data,
-          stackX({ x: "fraction", fill: (d) => (d.status === "Voted" ? "green" : "red") })
-        ),
-        textX(
-          data,
-          stackX({
-            x: "fraction",
-            text: (d) => `${d.status} (${d.total}, ${(d.fraction * 100).toFixed(2)}%)`,
-            fill: "white",
-          })
-        ),
       ],
     })
   }

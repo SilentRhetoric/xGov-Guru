@@ -280,7 +280,7 @@ function App() {
           </For>
         </Accordion.Root>
       </div>
-      <footer class="mt-16 flex flex-col justify-center gap-2 p-4 font-light">
+      <footer class="mt-16 flex flex-col justify-center gap-2 gap-x-16 p-4 font-light lg:flex-row">
         <a
           href="https://x.com/silentrhetoric"
           target="_blank"
