@@ -29,16 +29,25 @@ function useData() {
   const [questions, setQuestions] = createSignal<QuestionResult[]>([])
   const [expandedItem, setExpandedItem] = createSignal([""])
   const [sort, setSort] = createSignal("")
+
   const votesCsv = createMemo(() => {
     if (votingData()?.votes.length) {
       return createVotesCSV(votingData()?.votes)
     } else return null
   })
+
+  const votersCsv = createMemo(() => {
+    if (votingData()?.voters.length) {
+      return createVotersCSV(votingData()?.voters)
+    } else return null
+  })
+
   const governorsCsv = createMemo(() => {
     if (votingData()?.governors.snapshot.length) {
       return createGovernorsCSV(votingData()?.governors.snapshot)
     } else return null
   })
+
   const [timerDetails, setTimerDetails] = createSignal(
     timeBetweenDates(new Date(sessionData()?.end).valueOf()).timeData
   )
@@ -138,6 +147,11 @@ function useData() {
           } else return count
         }, 0)
       )
+      const alloUrl = `https://allo.info/account/${address}`
+      const date = new Date()
+      const formattedDate = date.toISOString().split("T")[0]
+      const bitqueryUrl = `https://explorer.bitquery.io/algorand/address/${address}/graph?from=2019-06-11&till=${formattedDate}`
+
       const voterInfo = {
         address,
         voteWeights,
@@ -146,6 +160,8 @@ function useData() {
         voteRound,
         voteRoundTime,
         numVotes,
+        alloUrl,
+        bitqueryUrl,
       }
       return voterInfo
     })
@@ -330,6 +346,29 @@ function useData() {
     }
   }
 
+  function createVotersCSV(voters: VoterInfo[]) {
+    const csvRows: string[] = []
+    // Remove the voteWeights field from the CSV as it is a a comma-separated array
+    const fields = Object.keys(voters[0]).filter((field) => field !== "voteWeights")
+    csvRows.push(fields.join(","))
+    for (const voter of voters) {
+      const values = fields.map((field) => {
+        const val = voter[field]
+        // console.debug("val: ", val)
+        return `${val}`
+      })
+      csvRows.push(values.join(","))
+    }
+    const fileContent = csvRows.join("\n")
+    const filename = "voters.csv"
+    let blob = new Blob([fileContent], { type: "text/csv;charset=utf-8;" })
+    let url = URL.createObjectURL(blob)
+    return {
+      filename,
+      url,
+    }
+  }
+
   function createGovernorsCSV(governors: Governor[]) {
     const csvRows: string[] = []
     const fields = Object.keys(governors[0])
@@ -433,6 +472,7 @@ function useData() {
     sort,
     setSort,
     votesCsv,
+    votersCsv,
     governorsCsv,
     timerDetails,
     setTimerDetails,

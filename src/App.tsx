@@ -24,6 +24,7 @@ function App() {
     setExpandedItem,
     getProposal,
     votesCsv,
+    votersCsv,
     governorsCsv,
     timerDetails,
     sortAmount,
@@ -177,7 +178,7 @@ function App() {
         </Suspense>
         <Suspense fallback={<p class="p-2">Generating graphs... 📊📊📊📊📊📊</p>}>
           <div class="mx-auto flex flex-col gap-4">
-            <div class="flex flex-col gap-2 sm:flex-row">
+            <div class="flex flex-col gap-2 md:flex-row">
               <Show when={votesCsv()}>
                 <a
                   href={votesCsv().url}
@@ -199,7 +200,32 @@ function App() {
                         d="M9 8.25H7.5a2.25 2.25 0 00-2.25 2.25v9a2.25 2.25 0 002.25 2.25h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25H15M9 12l3 3m0 0l3-3m-3 3V2.25"
                       />
                     </svg>
-                    <p class="font-light">Voting data .csv</p>
+                    <p class="font-light">Individual votes .csv</p>
+                  </Button.Root>
+                </a>
+              </Show>
+              <Show when={votersCsv()}>
+                <a
+                  href={votersCsv().url}
+                  download={votersCsv().filename}
+                  class="flex grow"
+                >
+                  <Button.Root class="flex h-12 w-full gap-2 rounded-xl border-[0.5px] border-neutral-500 p-2 text-xl hover:bg-neutral-300 active:bg-neutral-400">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke-width="1.5"
+                      stroke="currentColor"
+                      class="h-6 w-6"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M9 8.25H7.5a2.25 2.25 0 00-2.25 2.25v9a2.25 2.25 0 002.25 2.25h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25H15M9 12l3 3m0 0l3-3m-3 3V2.25"
+                      />
+                    </svg>
+                    <p class="font-light">Voting accounts .csv</p>
                   </Button.Root>
                 </a>
               </Show>
