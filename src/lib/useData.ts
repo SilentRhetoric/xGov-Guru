@@ -27,6 +27,7 @@ function useData() {
   const [votingData] = createResource(getVotingData)
   const [sessionData] = createResource(fetchSessionData)
   const [questions, setQuestions] = createSignal<QuestionResult[]>([])
+  const [expandGraphs, setExpandGraphs] = createSignal(true)
   const [expandedItem, setExpandedItem] = createSignal([""])
   const [sort, setSort] = createSignal("")
 
@@ -80,6 +81,7 @@ function useData() {
           questions.unshift(proposalToExpand)
           setQuestions(questions)
           setExpandedItem([expandId])
+          setExpandGraphs(false)
         }
       } else {
         setQuestions(questions)
@@ -464,6 +466,8 @@ function useData() {
   return {
     votingData,
     sessionData,
+    expandGraphs,
+    setExpandGraphs,
     questions,
     setQuestions,
     getProposal,

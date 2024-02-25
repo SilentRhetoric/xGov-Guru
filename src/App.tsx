@@ -1,4 +1,4 @@
-import { Accordion, Button } from "@kobalte/core"
+import { Accordion, Button, Collapsible } from "@kobalte/core"
 import { For, Show, Suspense, createResource } from "solid-js"
 import algonode from "./assets/algonode.png"
 import { dateOptions, formatNumWithDecimals, numberWithCommas } from "./lib/utils"
@@ -19,6 +19,8 @@ function App() {
   const {
     votingData,
     sessionData,
+    expandGraphs,
+    setExpandGraphs,
     questions,
     expandedItem,
     setExpandedItem,
@@ -127,7 +129,7 @@ function App() {
       <div class="mx-auto flex flex-col gap-8 p-2">
         <Suspense fallback={<p class="p-2">Loading session details...</p>}>
           <div>
-            <h2 class="font-semibold">Active Algorand xGov Session Details</h2>
+            <h2>{sessionData()?.title} Details</h2>
             <p class="font-semibold">
               Session Title: <span class="font-light">{sessionData()?.title}</span>
             </p>
@@ -176,101 +178,115 @@ function App() {
             </p>
           </div>
         </Suspense>
-        <Suspense fallback={<p class="p-2">Generating graphs... 📊📊📊📊📊📊</p>}>
-          <div class="mx-auto flex flex-col gap-4">
-            <div class="flex flex-col gap-2 md:flex-row">
-              <Show when={votesCsv()}>
-                <a
-                  href={votesCsv().url}
-                  download={votesCsv().filename}
-                  class="flex grow"
-                >
-                  <Button.Root class="flex h-12 w-full gap-2 rounded-xl border-[0.5px] border-neutral-500 p-2 text-xl hover:bg-neutral-300 active:bg-neutral-400">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke-width="1.5"
-                      stroke="currentColor"
-                      class="h-6 w-6"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M9 8.25H7.5a2.25 2.25 0 00-2.25 2.25v9a2.25 2.25 0 002.25 2.25h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25H15M9 12l3 3m0 0l3-3m-3 3V2.25"
-                      />
-                    </svg>
-                    <p class="font-light">Individual votes .csv</p>
-                  </Button.Root>
-                </a>
-              </Show>
-              <Show when={votersCsv()}>
-                <a
-                  href={votersCsv().url}
-                  download={votersCsv().filename}
-                  class="flex grow"
-                >
-                  <Button.Root class="flex h-12 w-full gap-2 rounded-xl border-[0.5px] border-neutral-500 p-2 text-xl hover:bg-neutral-300 active:bg-neutral-400">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke-width="1.5"
-                      stroke="currentColor"
-                      class="h-6 w-6"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M9 8.25H7.5a2.25 2.25 0 00-2.25 2.25v9a2.25 2.25 0 002.25 2.25h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25H15M9 12l3 3m0 0l3-3m-3 3V2.25"
-                      />
-                    </svg>
-                    <p class="font-light">Voting accounts .csv</p>
-                  </Button.Root>
-                </a>
-              </Show>
-              <Show when={governorsCsv()}>
-                <a
-                  href={governorsCsv().url}
-                  download={governorsCsv().filename}
-                  class="flex grow"
-                >
-                  <Button.Root class="flex h-12 w-full gap-2 rounded-xl border-[0.5px] border-neutral-500 p-2 text-xl hover:bg-neutral-300 active:bg-neutral-400">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke-width="1.5"
-                      stroke="currentColor"
-                      class="h-6 w-6"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M9 8.25H7.5a2.25 2.25 0 00-2.25 2.25v9a2.25 2.25 0 002.25 2.25h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25H15M9 12l3 3m0 0l3-3m-3 3V2.25"
-                      />
-                    </svg>
-                    <p class="font-light">xGovs snapshot .csv</p>
-                  </Button.Root>
-                </a>
-              </Show>
-            </div>
-            <div>{voterParticipation(votingData())}</div>
-            <div>{weightParticipation(votingData())}</div>
-            <div>{votesByEffect(votingData())}</div>
-            <div>{votesVsThrehold(votingData())}</div>
-            <div>{votesVsThreholdPercentage(votingData())}</div>
-            <div>{accountsByProposal(votingData())}</div>
-            <div>{votesPerVoter(votingData())}</div>
+        <Collapsible.Root
+          open={expandGraphs()}
+          defaultOpen={true}
+          onClick={() => setExpandGraphs(!expandGraphs())}
+        >
+          <div class="mb-4 flex flex-row items-center gap-4">
+            <h2>{sessionData()?.title} Voting Data</h2>
+            <Collapsible.Trigger class="flex items-center justify-center rounded-xl border-[0.5px] border-neutral-500 px-3 py-2 hover:bg-neutral-300 active:bg-neutral-400">
+              {expandGraphs() ? "Hide" : "Show"}
+            </Collapsible.Trigger>
           </div>
-        </Suspense>
+          <Collapsible.Content>
+            <Suspense fallback={<p class="p-2">Generating graphs... 📊📊📊📊📊📊</p>}>
+              <div class="mx-auto flex flex-col gap-4">
+                <div class="flex flex-col gap-2 md:flex-row">
+                  <Show when={votesCsv()}>
+                    <a
+                      href={votesCsv().url}
+                      download={votesCsv().filename}
+                      class="flex grow"
+                    >
+                      <Button.Root class="flex h-12 w-full gap-2 rounded-xl border-[0.5px] border-neutral-500 p-2 text-xl hover:bg-neutral-300 active:bg-neutral-400">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke-width="1.5"
+                          stroke="currentColor"
+                          class="h-6 w-6"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M9 8.25H7.5a2.25 2.25 0 00-2.25 2.25v9a2.25 2.25 0 002.25 2.25h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25H15M9 12l3 3m0 0l3-3m-3 3V2.25"
+                          />
+                        </svg>
+                        <p class="font-light">Individual votes .csv</p>
+                      </Button.Root>
+                    </a>
+                  </Show>
+                  <Show when={votersCsv()}>
+                    <a
+                      href={votersCsv().url}
+                      download={votersCsv().filename}
+                      class="flex grow"
+                    >
+                      <Button.Root class="flex h-12 w-full gap-2 rounded-xl border-[0.5px] border-neutral-500 p-2 text-xl hover:bg-neutral-300 active:bg-neutral-400">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke-width="1.5"
+                          stroke="currentColor"
+                          class="h-6 w-6"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M9 8.25H7.5a2.25 2.25 0 00-2.25 2.25v9a2.25 2.25 0 002.25 2.25h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25H15M9 12l3 3m0 0l3-3m-3 3V2.25"
+                          />
+                        </svg>
+                        <p class="font-light">Voting accounts .csv</p>
+                      </Button.Root>
+                    </a>
+                  </Show>
+                  <Show when={governorsCsv()}>
+                    <a
+                      href={governorsCsv().url}
+                      download={governorsCsv().filename}
+                      class="flex grow"
+                    >
+                      <Button.Root class="flex h-12 w-full gap-2 rounded-xl border-[0.5px] border-neutral-500 p-2 text-xl hover:bg-neutral-300 active:bg-neutral-400">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke-width="1.5"
+                          stroke="currentColor"
+                          class="h-6 w-6"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M9 8.25H7.5a2.25 2.25 0 00-2.25 2.25v9a2.25 2.25 0 002.25 2.25h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25H15M9 12l3 3m0 0l3-3m-3 3V2.25"
+                          />
+                        </svg>
+                        <p class="font-light">xGovs snapshot .csv</p>
+                      </Button.Root>
+                    </a>
+                  </Show>
+                </div>
+                <div>{voterParticipation(votingData())}</div>
+                <div>{weightParticipation(votingData())}</div>
+                <div>{votesByEffect(votingData())}</div>
+                <div>{votesVsThrehold(votingData())}</div>
+                <div>{votesVsThreholdPercentage(votingData())}</div>
+                <div>{accountsByProposal(votingData())}</div>
+                <div>{votesPerVoter(votingData())}</div>
+              </div>
+            </Suspense>
+          </Collapsible.Content>
+        </Collapsible.Root>
         <Accordion.Root
           collapsible
           class="flex flex-col gap-2"
           value={expandedItem()}
           onChange={setExpandedItem}
         >
-          <h2 class="text-xl font-bold">{sessionData()?.title} Proposals</h2>
+          <h2>{sessionData()?.title} Proposals</h2>
           <For each={questions()}>
             {(question) => (
               <Accordion.Item
