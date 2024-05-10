@@ -10,19 +10,19 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "@types/node": "^20.4.8",
+    "@types/node": "^20.5.7",
     "@typescript-eslint/eslint-plugin": "^6.11.0",
     "@typescript-eslint/parser": "^6.11.0",
     "algosdk": "^2.7.0",
-    "autoprefixer": "^10.4.14",
+    "autoprefixer": "^10.4.15",
     "eslint": "^8.54.0",
     "eslint-plugin-solid": "^0.13.0",
-    "postcss": "^8.4.27",
+    "postcss": "^8.4.28",
     "prettier": "^2.8.8",
     "prettier-plugin-tailwindcss": "^0.2.8",
     "tailwindcss": "^3.3.3",
-    "typescript": "^5.1.6",
-    "vite": "^4.4.8",
+    "typescript": "^5.2.2",
+    "vite": "^4.4.9",
     "vite-plugin-cdn-import": "^0.3.5",
     "vite-plugin-eslint": "^1.8.1",
     "vite-plugin-solid": "^2.7.0"
@@ -33,6 +33,6 @@
     "@kobalte/tailwindcss": "^0.6.5",
     "@observablehq/plot": "^0.6.10",
     "buffer": "^6.0.3",
-    "solid-js": "^1.7.9"
+    "solid-js": "^1.7.11"
   }
 }
