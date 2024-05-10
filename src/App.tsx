@@ -13,7 +13,7 @@ import {
   votesVsThreholdPercentage,
   weightParticipation,
 } from "./lib/plots"
-import { SESSION_INFO } from "./lib/constants"
+import { ACTIVE_SESSION, SESSION_INFO } from "./lib/constants"
 
 function App() {
   const {
@@ -103,7 +103,7 @@ function App() {
             </Button.Root>
             <a
               class="flex h-10 w-24 items-center justify-center rounded-xl border-[0.5px] border-neutral-500 px-2 py-2 text-xl font-light hover:bg-neutral-300 active:bg-neutral-400"
-              href={`https://xgov.algorand.foundation/vote/${SESSION_INFO[3].appId}`}
+              href={`https://xgov.algorand.foundation/vote/${SESSION_INFO[ACTIVE_SESSION].appId}`}
               target="_blank"
               rel="noopener noreferrer"
             >

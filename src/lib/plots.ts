@@ -11,7 +11,7 @@ import {
   ruleY,
 } from "@observablehq/plot"
 import { Question, VotingData } from "./types"
-import { SESSION_INFO } from "./constants"
+import { ACTIVE_SESSION, SESSION_INFO } from "./constants"
 import useData from "./useData"
 
 const { votingData } = useData
@@ -59,7 +59,7 @@ export function voterParticipation(votingData: VotingData) {
 export function weightParticipation(votingData: VotingData) {
   if (votingData) {
     const votedWeight = votingData.voters.reduce((sum, v) => (sum += v.voterWeight), 0)
-    const totalWeight = votingData.governors.snapshot.reduce((sum, g) => (sum += g.weight), 0)
+    const totalWeight = SESSION_INFO[ACTIVE_SESSION].totalVotingWeight
     const data = [
       {
         status: "Voted",
@@ -105,7 +105,7 @@ export function votesByEffect(votingData: VotingData) {
       style: { background: "none" },
       marginLeft: 110,
       width: 1280,
-      x: { type: "band", label: "Proposal", domain: SESSION_INFO[3].proposalNums },
+      x: { type: "band", label: "Proposal", domain: SESSION_INFO[ACTIVE_SESSION].proposalNums },
       y: { grid: true },
       marks: [
         barY(votingData?.votes, {
@@ -125,7 +125,9 @@ export function votesByEffect(votingData: VotingData) {
 export function votesVsThrehold(votingData: VotingData) {
   if (votingData) {
     // Period 3 has mock proposal last again, so filter it
-    const actualProposals = structuredClone(SESSION_INFO[3].proposalNums).filter((p) => p !== "01")
+    const actualProposals = structuredClone(SESSION_INFO[ACTIVE_SESSION].proposalNums).filter(
+      (p) => p !== "01"
+    )
     // Period 1 had mock proposal 01 last so pop it
     // actualProposals.pop()
     // Period 2 has mock proposal first so shift it
@@ -182,11 +184,13 @@ export function votesVsThrehold(votingData: VotingData) {
 export function votesVsThreholdPercentage(votingData: VotingData) {
   if (votingData) {
     const votedWeight = votingData.voters.reduce((sum, v) => (sum += v.voterWeight), 0)
-    const totalWeight = votingData.governors.snapshot.reduce((sum, g) => (sum += g.weight), 0)
+    const totalWeight = SESSION_INFO[ACTIVE_SESSION].totalVotingWeight
     const percentWeightVoted = (100 * votedWeight) / totalWeight
 
     // Period 3 has mock proposal last again, so filter it
-    const actualProposals = structuredClone(SESSION_INFO[3].proposalNums).filter((p) => p !== "01")
+    const actualProposals = structuredClone(SESSION_INFO[ACTIVE_SESSION].proposalNums).filter(
+      (p) => p !== "01"
+    )
     // Period 1 had mock proposal 01 last so pop it
     // actualProposals.pop()
     // Period 2 has mock proposal first so shift it
@@ -248,7 +252,7 @@ export function accountsByProposal(votingData: VotingData) {
       subtitle: "How many different accounts supported each proposal?",
       style: { background: "none" },
       width: 1280,
-      x: { domain: SESSION_INFO[3].proposalNums, label: "Proposal #" },
+      x: { domain: SESSION_INFO[ACTIVE_SESSION].proposalNums, label: "Proposal #" },
       y: { label: "# of Unique Accounts" },
       marks: [
         barY(votingData?.results.questionResults, {

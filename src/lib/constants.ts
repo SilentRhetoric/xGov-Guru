@@ -198,4 +198,39 @@ export const SESSION_INFO = {
       "01",
     ],
   },
+  4: {
+    appId: 1821334702,
+    totalVotingWeight: 4633992303637,
+    metadataUrl:
+      "https://api.voting.algorand.foundation/ipfs/bafkreicyon6rwn6kwjesfkepi75fqfej3kde2jrgflyzmsuo6ydqst4foy",
+    governorDataUrl:
+      "https://api.voting.algorand.foundation/ipfs/bafybeiap7yvzrianyuk5vqrzeybs5xhchb6lhh6llh7x3ld35zst3q3rh4",
+    proposalNums: [
+      "178",
+      "180",
+      "182",
+      "183",
+      "184",
+      "186",
+      "187",
+      "192",
+      "194",
+      "195",
+      "196",
+      "197",
+      "198",
+      "199",
+      "200",
+      "201",
+      "202",
+      "203",
+      "204",
+      "205",
+      "206",
+      "208",
+      "01",
+    ],
+  },
 }
+
+export const ACTIVE_SESSION = 4

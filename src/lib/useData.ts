@@ -10,7 +10,7 @@ import {
   VotingData,
 } from "./types"
 import { timeBetweenDates } from "./utils"
-import { SESSION_INFO } from "./constants"
+import { ACTIVE_SESSION, SESSION_INFO } from "./constants"
 import { ABIArrayDynamicType, ABIUintType } from "algosdk"
 import {
   getAlgoIndexerClient,
@@ -54,7 +54,9 @@ function useData() {
   )
 
   async function fetchSessionData(): Promise<SessionData> {
-    const text = await fetch(SESSION_INFO[3].metadataUrl).then((response) => response.text())
+    const text = await fetch(SESSION_INFO[ACTIVE_SESSION].metadataUrl).then((response) =>
+      response.text()
+    )
     const sessionData: SessionData = JSON.parse(text)
     sessionData.questions.forEach((question, i) => {
       question.proposalIndex = i
@@ -118,7 +120,7 @@ function useData() {
   async function getVoterInfo(): Promise<VoterInfo[]> {
     const results = await searchTransactions(
       indexerClient,
-      (s) => s.applicationID(SESSION_INFO[3].appId),
+      (s) => s.applicationID(SESSION_INFO[ACTIVE_SESSION].appId),
       10000
     )
     // console.debug("results: ", results)
@@ -139,7 +141,7 @@ function useData() {
       ) as bigint[]
       // console.debug("Vote weights: ", voteWeights)
       const voterWeight = Number(voteWeights.reduce((partialSum, w) => partialSum + w, 0n))
-      const relativeWeight = voterWeight / SESSION_INFO[3].totalVotingWeight
+      const relativeWeight = voterWeight / SESSION_INFO[ACTIVE_SESSION].totalVotingWeight
       const voteRound = txn["confirmed-round"]
       const voteRoundTime = txn["round-time"]
       const numVotes = Number(
@@ -178,7 +180,7 @@ function useData() {
           return {
             address: voterInfo.address,
             nfd: voterInfo.nfd,
-            proposal: SESSION_INFO[3].proposalNums[j],
+            proposal: SESSION_INFO[ACTIVE_SESSION].proposalNums[j],
             proposalIndex: j,
             votes: Number(vote),
             voterWeight: Number(voterInfo.voterWeight),
@@ -195,7 +197,9 @@ function useData() {
 
   // Get the xGov session data file from the Foundation's IPFS
   async function getSessionMetaData(): Promise<SessionData> {
-    const text = await fetch(SESSION_INFO[3].metadataUrl).then((response) => response.text())
+    const text = await fetch(SESSION_INFO[ACTIVE_SESSION].metadataUrl).then((response) =>
+      response.text()
+    )
     const sessionData: SessionData = JSON.parse(text)
     sessionData.questions.forEach((question) => {
       const abstract = question.description.split("#")[0] // Use only the content above the next heading
@@ -208,7 +212,9 @@ function useData() {
   }
 
   async function getGovernorsData(): Promise<GovernorsData> {
-    const text = await fetch(SESSION_INFO[3].governorDataUrl).then((response) => response.text())
+    const text = await fetch(SESSION_INFO[ACTIVE_SESSION].governorDataUrl).then((response) =>
+      response.text()
+    )
     const governorsData: GovernorsData = JSON.parse(text)
     // console.debug("governorsData: ", governorsData)
     return governorsData
@@ -227,14 +233,14 @@ function useData() {
       sessionResultData.questionResults = sessionResultData.questions
       sessionResultData.questionResults.forEach((q, i) => {
         q.proposalIndex = i
-        q.proposal = SESSION_INFO[3].proposalNums[i]
+        q.proposal = SESSION_INFO[ACTIVE_SESSION].proposalNums[i]
         q.threshold = q.metadata.threshold
         q.passed = "Not Passed"
         q.passedRound = null
         q.passedTime = null
       })
       sessionResultData.questionResults.forEach(
-        (q, i) => (q.proposal = SESSION_INFO[3].proposalNums[i])
+        (q, i) => (q.proposal = SESSION_INFO[ACTIVE_SESSION].proposalNums[i])
       )
       sessionResultData.questionResults.forEach((q) => (q.threshold = q.metadata.threshold))
       sessionResultData.questionResults.forEach((q) => (q.passed = "Not Passed"))
